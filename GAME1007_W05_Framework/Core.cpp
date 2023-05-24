@@ -157,6 +157,16 @@ void PlayMusic(Music* music, bool loop)
 	Mix_PlayMusic(music, loop ? -1 : 0);
 }
 
+void PauseMusic()
+{
+	Mix_PauseMusic();
+}
+
+void ResumeMusic()
+{
+	Mix_ResumeMusic();
+}
+
 int GetFps()
 {
 	return gTime.frameCount > gTime.samples.size() ?

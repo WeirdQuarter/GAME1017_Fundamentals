@@ -26,6 +26,8 @@ void PlaySound(Sound* sound, bool loop = false);
 Music* LoadMusic(const char* path);
 void UnloadMusic(Music* music);
 void PlayMusic(Music* music, bool loop = true);
+void PauseMusic();
+void ResumeMusic();
 
 int GetFps();			// Average frame rate
 void SetFps(int fps);	// Desired (maximum) frame rate
