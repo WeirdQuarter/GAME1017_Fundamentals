@@ -11,6 +11,8 @@ struct Game
 	Texture* shipTex = nullptr;
 	Rect shipRec{ 0.0f, 0.0f, 60.0f, 40.0f };
 	float shipSpeed = 100.0f;
+
+	Sound* sound1;
 };
 
 void Update(Game& game, float dt)
@@ -95,9 +97,12 @@ Uint32 CustomTimer(Uint32 interval, void* param)
 
 void OnGui(void* data)
 {
-	//static bool ticked = false;
-	//ImGui::Checkbox("Test", &ticked);
-	ImGui::ShowDemoWindow();
+	Game& game = *(Game*)data;
+
+	if (ImGui::Button("Fire!"))
+	{
+		PlaySound(game.sound1);
+	}
 }
 
 int main(int argc, char* argv[])
@@ -109,6 +114,7 @@ int main(int argc, char* argv[])
 
 	Game game;
 	game.shipTex = LoadTexture("../Assets/img/enterprise.png");
+	game.sound1 = LoadSound("../Assets/aud/Fire.wav");
 	SaveGame(game);
 
 	//Custom custom;
@@ -116,7 +122,7 @@ int main(int argc, char* argv[])
 	//SDL_AddTimer(2000, Pause, (void*)"Music paused.");
 	//SDL_AddTimer(4000, Resume, (void*)"Music resumed!");
 
-	SetGuiCallback(OnGui, nullptr);
+	SetGuiCallback(OnGui, &game);
 
 	while (IsRunning())
 	{
@@ -128,6 +134,7 @@ int main(int argc, char* argv[])
 
 	UnloadTexture(game.shipTex);
 	UnloadMusic(music);
+	UnloadSound(game.sound1);
 	AppExit();
 	return 0;
 }
