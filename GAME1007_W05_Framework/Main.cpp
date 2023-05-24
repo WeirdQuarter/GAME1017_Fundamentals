@@ -93,6 +93,13 @@ Uint32 CustomTimer(Uint32 interval, void* param)
 	return 0;
 }
 
+void OnGui(void* data)
+{
+	//static bool ticked = false;
+	//ImGui::Checkbox("Test", &ticked);
+	ImGui::ShowDemoWindow();
+}
+
 int main(int argc, char* argv[])
 {
 	AppInit(1024, 768);
@@ -108,6 +115,8 @@ int main(int argc, char* argv[])
 	//SDL_AddTimer(1000, CustomTimer, &custom);
 	//SDL_AddTimer(2000, Pause, (void*)"Music paused.");
 	//SDL_AddTimer(4000, Resume, (void*)"Music resumed!");
+
+	SetGuiCallback(OnGui, nullptr);
 
 	while (IsRunning())
 	{

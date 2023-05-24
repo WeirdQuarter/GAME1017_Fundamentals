@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
+#include "imgui/imgui.h"
 
 using Texture = SDL_Texture;
 using Rect = SDL_FRect;
@@ -9,6 +10,9 @@ using Color = SDL_Color;
 using Point = SDL_FPoint;
 using Sound = Mix_Chunk;
 using Music = Mix_Music;
+using GuiCallback = void(*)(void*);
+
+void SetGuiCallback(GuiCallback callback, void* data);
 
 void AppInit(int width, int height);
 void AppExit();

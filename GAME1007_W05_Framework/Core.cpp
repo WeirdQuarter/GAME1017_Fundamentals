@@ -26,9 +26,17 @@ struct App
 	bool running = false;
 	SDL_Window* window = nullptr;
 	SDL_Renderer* renderer = nullptr;
+	GuiCallback guiCallback = nullptr;
+	void* guiData = nullptr;
 
 	array<Uint8, SDL_NUM_SCANCODES> keyboard{};
 } gApp;
+
+void SetGuiCallback(GuiCallback callback, void* data)
+{
+	gApp.guiCallback = callback;
+	gApp.guiData = data;
+}
 
 void AppInit(int width, int height)
 {
@@ -103,7 +111,8 @@ void RenderEnd()
 	ImGui_ImplSDLRenderer_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
+	if (gApp.guiCallback != nullptr) gApp.guiCallback(gApp.guiData);
 	ImGui::Render();
 	ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
 
