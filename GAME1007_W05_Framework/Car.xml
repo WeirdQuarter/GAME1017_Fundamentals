@@ -1,0 +1,7 @@
+<CarDefinition>
+    <Acceleration a="20"/>
+    <Wheel>
+        <Radius r="10"/>
+    </Wheel>
+    <Mass m="30"/>
+</CarDefinition>

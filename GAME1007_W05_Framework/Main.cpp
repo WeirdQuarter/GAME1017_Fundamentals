@@ -1,5 +1,8 @@
 #include <SDL_main.h>
 #include "Core.h"
+#include <array>
+#include "tinyxml2.h"
+using namespace tinyxml2;
 
 struct Game
 {
@@ -18,12 +21,53 @@ void Render(const Game& game)
 	DrawTexture(game.shipTex, game.shipRec);
 }
 
+void SaveCar()
+{
+	XMLDocument doc;	//DOM tree (in-memory representation of xml document)
+	XMLNode* root = doc.NewElement("CarDefinition");
+	doc.InsertEndChild(root);
+
+	XMLElement* acceleration = doc.NewElement("Acceleration");
+	acceleration->SetAttribute("a", 20.0f);
+	root->InsertEndChild(acceleration);
+
+	XMLElement* wheel = doc.NewElement("Wheel");
+	XMLElement* radius = doc.NewElement("Radius");
+	radius->SetAttribute("r", 10.0f);
+	wheel->InsertEndChild(radius);
+	root->InsertEndChild(wheel);
+
+	XMLElement* mass = doc.NewElement("Mass");
+	mass->SetAttribute("m", 30.0f);
+	root->InsertEndChild(mass);
+
+	doc.SaveFile("Car.xml");
+}
+
+void SaveGame(const Game& game)
+{
+	XMLDocument doc;
+	XMLNode* root = doc.NewElement("Game");
+	doc.InsertEndChild(root);
+
+	XMLElement* ship = doc.NewElement("Ship");
+	ship->SetAttribute("x", 0.0f);
+	ship->SetAttribute("y", 0.0f);
+	ship->SetAttribute("w", 60.0f);
+	ship->SetAttribute("h", 40.0f);
+	ship->SetAttribute("speed", 100.0f);
+	root->InsertEndChild(ship);
+
+	doc.SaveFile("Game.xml");
+}
+
 int main(int argc, char* argv[])
 {
 	AppInit(1024, 768);
 
 	Game game;
 	game.shipTex = LoadTexture("../Assets/img/enterprise.png");
+	SaveGame(game);
 
 	while (IsRunning())
 	{
