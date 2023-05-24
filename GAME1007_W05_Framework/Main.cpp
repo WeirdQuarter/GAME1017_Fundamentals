@@ -65,6 +65,9 @@ int main(int argc, char* argv[])
 {
 	AppInit(1024, 768);
 
+	Music* music = LoadMusic("../Assets/aud/Wings.mp3");
+	PlayMusic(music);
+
 	Game game;
 	game.shipTex = LoadTexture("../Assets/img/enterprise.png");
 	SaveGame(game);
@@ -78,6 +81,7 @@ int main(int argc, char* argv[])
 	}
 
 	UnloadTexture(game.shipTex);
+	UnloadMusic(music);
 	AppExit();
 	return 0;
 }

@@ -1,10 +1,14 @@
 #pragma once
 #include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
 
 using Texture = SDL_Texture;
 using Rect = SDL_FRect;
 using Color = SDL_Color;
 using Point = SDL_FPoint;
+using Sound = Mix_Chunk;
+using Music = Mix_Music;
 
 void AppInit(int width, int height);
 void AppExit();
@@ -14,6 +18,14 @@ void RenderEnd();
 
 Texture* LoadTexture(const char* path);
 void UnloadTexture(Texture* texture);
+
+Sound* LoadSound(const char* path);
+void UnloadSound(Sound* sound);
+void PlaySound(Sound* sound, bool loop = false);
+
+Music* LoadMusic(const char* path);
+void UnloadMusic(Music* music);
+void PlayMusic(Music* music, bool loop = true);
 
 int GetFps();			// Average frame rate
 void SetFps(int fps);	// Desired (maximum) frame rate
