@@ -98,16 +98,16 @@ int main(int argc, char* argv[])
 	AppInit(1024, 768);
 
 	Music* music = LoadMusic("../Assets/aud/Wings.mp3");
-	PlayMusic(music);
+	//PlayMusic(music);
 
 	Game game;
 	game.shipTex = LoadTexture("../Assets/img/enterprise.png");
 	SaveGame(game);
 
-	Custom custom;
-	SDL_AddTimer(1000, CustomTimer, &custom);
-	SDL_AddTimer(2000, Pause, (void*)"Music paused.");
-	SDL_AddTimer(4000, Resume, (void*)"Music resumed!");
+	//Custom custom;
+	//SDL_AddTimer(1000, CustomTimer, &custom);
+	//SDL_AddTimer(2000, Pause, (void*)"Music paused.");
+	//SDL_AddTimer(4000, Resume, (void*)"Music resumed!");
 
 	while (IsRunning())
 	{

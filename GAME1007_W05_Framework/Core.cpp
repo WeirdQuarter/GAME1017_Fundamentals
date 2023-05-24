@@ -1,4 +1,6 @@
 #include "Core.h"
+#include "imgui/imgui_impl_sdl2.h"
+#include "imgui/imgui_impl_sdlrenderer.h"
 #include <cassert>
 #include <array>
 
@@ -40,6 +42,12 @@ void AppInit(int width, int height)
 	gApp.window = SDL_CreateWindow("Fundamentals 2 Framework", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
 	gApp.renderer = SDL_CreateRenderer(gApp.window, -1, 0);
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplSDL2_InitForSDLRenderer(gApp.window, gApp.renderer);
+	ImGui_ImplSDLRenderer_Init(gApp.renderer);
+
 	gTime.previous = TotalTime();
 	gApp.running = true;
 }
@@ -48,6 +56,10 @@ void AppExit()
 {
 	assert(gApp.window != nullptr);
 	assert(gApp.renderer != nullptr);
+
+	ImGui_ImplSDLRenderer_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 
 	SDL_DestroyRenderer(gApp.renderer);
 	SDL_DestroyWindow(gApp.window);
@@ -63,6 +75,7 @@ void PollEvents()
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
+		ImGui_ImplSDL2_ProcessEvent(&event);
 		switch (event.type)
 		{
 		case SDL_QUIT:
@@ -87,6 +100,13 @@ void RenderBegin()
 
 void RenderEnd()
 {
+	ImGui_ImplSDLRenderer_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
+	ImGui::NewFrame();
+	ImGui::ShowDemoWindow();
+	ImGui::Render();
+	ImGui_ImplSDLRenderer_RenderDrawData(ImGui::GetDrawData());
+
 	gTime.current = TotalTime();
 	gTime.render = gTime.current - gTime.previous;
 	gTime.previous = gTime.current;
