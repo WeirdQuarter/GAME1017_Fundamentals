@@ -40,6 +40,9 @@ private:
 class TitleScene : public Scene
 {
 public:
+	void OnEnter() final;
+	void OnExit() final;
+
 	void OnUpdate(float dt) final;
 	void OnRender() final;
 

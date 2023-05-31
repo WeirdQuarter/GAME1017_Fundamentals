@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "tinyxml2.h"
 #include <iostream>
+#include <cassert>
 using namespace std;
 using namespace tinyxml2;
 
@@ -11,7 +12,7 @@ void Scene::Init()
 {
 	sScenes[TITLE] = new TitleScene;
 	sScenes[GAME] = new GameScene;
-	sCurrent = GAME;
+	sCurrent = TITLE;
 	sScenes[sCurrent]->OnEnter();
 }
 
@@ -31,6 +32,26 @@ void Scene::Render()
 	sScenes[sCurrent]->OnRender();
 }
 
+void Scene::Change(Type type)
+{
+	assert(sCurrent != type);
+	sScenes[sCurrent]->OnExit();
+	sCurrent = type;
+	sScenes[sCurrent]->OnEnter();
+}
+
+void OnTitleGui(void* data);
+
+void TitleScene::OnEnter()
+{
+	SetGuiCallback(OnTitleGui, this);
+}
+
+void TitleScene::OnExit()
+{
+	SetGuiCallback(nullptr, nullptr);
+}
+
 void TitleScene::OnUpdate(float dt)
 {
 }
@@ -40,6 +61,17 @@ void TitleScene::OnRender()
 	DrawRect(mBackRec, { 0, 0, 0, 255 });
 	DrawRect(mFrontRec, { 255, 255, 255, 255 });
 }
+
+void OnTitleGui(void* data)
+{
+	TitleScene& scene = *(TitleScene*)data;
+	if (ImGui::Button("Begin!"))
+	{
+		Scene::Change(Scene::GAME);
+	}
+}
+
+void OnGameGui(void* data);
 
 GameScene::GameScene()
 {
@@ -107,4 +139,14 @@ void GameScene::OnUpdate(float dt)
 void GameScene::OnRender()
 {
 	DrawTexture(mShipTex, mShipRec);
+}
+
+void OnGameGui(void* data)
+{
+	GameScene& scene = *(GameScene*)data;
+
+	if (ImGui::Button("Fire!"))
+	{
+		//PlaySound(game.sound1);
+	}
 }
