@@ -9,15 +9,31 @@ using namespace std;
 struct Game
 {
 	Texture* shipTex = nullptr;
-	Rect shipRec{ 0.0f, 0.0f, 60.0f, 40.0f };
-	float shipSpeed = 100.0f;
+	Rect shipRec;
+	float shipSpeed;
 
 	Sound* sound1;
 };
 
 void Update(Game& game, float dt)
 {
-	game.shipRec.x += game.shipSpeed * dt;
+	//game.shipRec.x += game.shipSpeed * dt;
+	if (IsKeyDown(SDL_SCANCODE_A))
+	{
+		game.shipRec.x -= game.shipSpeed * dt;
+	}
+	if (IsKeyDown(SDL_SCANCODE_D))
+	{
+		game.shipRec.x += game.shipSpeed * dt;
+	}
+	if (IsKeyDown(SDL_SCANCODE_W))
+	{
+		game.shipRec.y -= game.shipSpeed * dt;
+	}
+	if (IsKeyDown(SDL_SCANCODE_S))
+	{
+		game.shipRec.y += game.shipSpeed * dt;
+	}
 }
 
 void Render(const Game& game)
@@ -55,14 +71,30 @@ void SaveGame(const Game& game)
 	doc.InsertEndChild(root);
 
 	XMLElement* ship = doc.NewElement("Ship");
-	ship->SetAttribute("x", 0.0f);
-	ship->SetAttribute("y", 0.0f);
-	ship->SetAttribute("w", 60.0f);
-	ship->SetAttribute("h", 40.0f);
-	ship->SetAttribute("speed", 100.0f);
+	ship->SetAttribute("x", game.shipRec.x);
+	ship->SetAttribute("y", game.shipRec.y);
+	ship->SetAttribute("w", game.shipRec.w);
+	ship->SetAttribute("h", game.shipRec.h);
+	ship->SetAttribute("speed", game.shipSpeed);
 	root->InsertEndChild(ship);
 
 	doc.SaveFile("Game.xml");
+}
+
+void LoadGame(Game& game)
+{
+	XMLDocument doc;
+	doc.LoadFile("Game.xml");
+
+	XMLElement* gameData = doc.FirstChildElement();
+	XMLElement* shipData = gameData->FirstChildElement();
+	shipData->QueryAttribute("x", &game.shipRec.x);
+	shipData->QueryAttribute("y", &game.shipRec.y);
+	shipData->QueryAttribute("w", &game.shipRec.w);
+	shipData->QueryAttribute("h", &game.shipRec.h);
+	shipData->QueryAttribute("speed", &game.shipSpeed);
+
+	cout << "Loaded " << gameData->Value() << endl;
 }
 
 Uint32 Pause(Uint32 interval, void* param)
@@ -113,9 +145,10 @@ int main(int argc, char* argv[])
 	//PlayMusic(music);
 
 	Game game;
+	LoadGame(game);
+
 	game.shipTex = LoadTexture("../Assets/img/enterprise.png");
 	game.sound1 = LoadSound("../Assets/aud/Fire.wav");
-	SaveGame(game);
 
 	//Custom custom;
 	//SDL_AddTimer(1000, CustomTimer, &custom);
@@ -131,6 +164,8 @@ int main(int argc, char* argv[])
 		Render(game);
 		RenderEnd();
 	}
+
+	SaveGame(game);
 
 	UnloadTexture(game.shipTex);
 	UnloadMusic(music);
