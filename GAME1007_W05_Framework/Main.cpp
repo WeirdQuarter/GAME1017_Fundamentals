@@ -198,23 +198,21 @@ int main(int argc, char* argv[])
 
 	//SetGuiCallback(OnGui, &game);
 
-	GameScene scene;
-	scene.OnEnter();
-
+	Scene::Init();
 	while (IsRunning())
 	{
-		scene.OnUpdate(FrameTime());
+		Scene::Update(FrameTime());
 		RenderBegin();
-		scene.OnRender();
+		Scene::Render();
 		RenderEnd();
 		//Update(game, FrameTime());
 		//RenderBegin();
 		//Render(game);
 		//RenderEnd();
 	}
-	scene.OnExit();
-	//SaveGame(game);
+	Scene::Exit();
 
+	//SaveGame(game);
 	//UnloadTexture(game.shipTex);
 	//UnloadMusic(music);
 	//UnloadSound(game.sound1);

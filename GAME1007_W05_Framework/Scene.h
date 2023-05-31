@@ -1,5 +1,7 @@
 #pragma once
 #include "Core.h"
+#include <array>
+#include <vector>
 constexpr int SCREEN_WIDTH = 1024;
 constexpr int SCREEN_HEIGHT = 768;
 
@@ -14,6 +16,25 @@ public:
 
 	virtual void OnUpdate(float dt) = 0;
 	virtual void OnRender() = 0;
+
+	enum Type : size_t
+	{
+		TITLE,
+		GAME,
+		COUNT
+	};
+
+	static void Init();
+	static void Exit();
+
+	static void Update(float dt);
+	static void Render();
+
+	static void Change(Type type);
+
+private:
+	static Type sCurrent;
+	static std::array<Scene*, COUNT> sScenes;
 };
 
 class TitleScene : public Scene

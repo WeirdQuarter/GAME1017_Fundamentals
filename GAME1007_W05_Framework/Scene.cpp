@@ -4,6 +4,33 @@
 using namespace std;
 using namespace tinyxml2;
 
+Scene::Type Scene::sCurrent;
+std::array<Scene*, Scene::COUNT> Scene::sScenes;
+
+void Scene::Init()
+{
+	sScenes[TITLE] = new TitleScene;
+	sScenes[GAME] = new GameScene;
+	sCurrent = GAME;
+	sScenes[sCurrent]->OnEnter();
+}
+
+void Scene::Exit()
+{
+	for (size_t i = 0; i < sScenes.size(); i++)
+		delete sScenes[i];
+}
+
+void Scene::Update(float dt)
+{
+	sScenes[sCurrent]->OnUpdate(dt);
+}
+
+void Scene::Render()
+{
+	sScenes[sCurrent]->OnRender();
+}
+
 void TitleScene::OnUpdate(float dt)
 {
 }
