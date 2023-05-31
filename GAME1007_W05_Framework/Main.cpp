@@ -80,20 +80,31 @@ void LoadCar(Car& car)
 	XMLDocument doc;
 	doc.LoadFile("Car.xml");
 
-	XMLElement* carData = doc.FirstChildElement();
-	XMLElement* acceleration = carData->FirstChildElement();
-	XMLElement* wheel = acceleration->NextSiblingElement();
-	XMLElement* radius = wheel->FirstChildElement();
-	XMLElement* mass = wheel->NextSiblingElement();
+	// CarDefinition is doc.FirstChildElement(),
+	// so doc.FirstChildElement()->FirstChildElement() is Acceleration.
+	XMLElement* element = doc.FirstChildElement()->FirstChildElement();
 
-	acceleration->QueryAttribute("a", &car.acceleration);
-	mass->QueryAttribute("m", &car.mass);
-	radius->QueryAttribute("r", &car.wheel.radius);
+	while (element != nullptr)
+	{
+		cout << "Current element: " << element->Value() << endl;
 
-	cout << "Loaded " << carData->Value() << endl;
-	cout << "Loaded " << acceleration->Value() << endl;
-	cout << "Loaded " << wheel->Value() << endl;
-	cout << "Loaded " << mass->Value() << endl;
+		if (strcmp(element->Value(), "Mass") == 0)
+		{
+			element->QueryAttribute("m", &car.mass);
+		}
+
+		if (strcmp(element->Value(), "Acceleration") == 0)
+		{
+			element->QueryAttribute("a", &car.acceleration);
+		}
+
+		if (strcmp(element->Value(), "Wheel") == 0)
+		{
+			element->FirstChildElement()->QueryAttribute("r", &car.wheel.radius);
+		}
+
+		element = element->NextSiblingElement();
+	}
 }
 
 void SaveGame(const Game& game)
