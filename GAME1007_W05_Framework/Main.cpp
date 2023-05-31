@@ -15,6 +15,17 @@ struct Game
 	Sound* sound1;
 };
 
+struct Car
+{
+	struct Wheel
+	{
+		float radius;
+	} wheel;
+
+	float acceleration;
+	float mass;
+};
+
 void Update(Game& game, float dt)
 {
 	//game.shipRec.x += game.shipSpeed * dt;
@@ -62,6 +73,27 @@ void SaveCar()
 	root->InsertEndChild(mass);
 
 	doc.SaveFile("Car.xml");
+}
+
+void LoadCar(Car& car)
+{
+	XMLDocument doc;
+	doc.LoadFile("Car.xml");
+
+	XMLElement* carData = doc.FirstChildElement();
+	XMLElement* acceleration = carData->FirstChildElement();
+	XMLElement* wheel = acceleration->NextSiblingElement();
+	XMLElement* radius = wheel->FirstChildElement();
+	XMLElement* mass = wheel->NextSiblingElement();
+
+	acceleration->QueryAttribute("a", &car.acceleration);
+	mass->QueryAttribute("m", &car.mass);
+	radius->QueryAttribute("r", &car.wheel.radius);
+
+	cout << "Loaded " << carData->Value() << endl;
+	cout << "Loaded " << acceleration->Value() << endl;
+	cout << "Loaded " << wheel->Value() << endl;
+	cout << "Loaded " << mass->Value() << endl;
 }
 
 void SaveGame(const Game& game)
@@ -139,6 +171,8 @@ void OnGui(void* data)
 
 int main(int argc, char* argv[])
 {
+	Car car;
+	LoadCar(car);
 	AppInit(1024, 768);
 
 	Music* music = LoadMusic("../Assets/aud/Wings.mp3");
