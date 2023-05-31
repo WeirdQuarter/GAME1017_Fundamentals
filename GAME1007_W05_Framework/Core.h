@@ -44,6 +44,7 @@ void Wait(double seconds);	// Halts the program for seconds
 
 bool IsRunning();
 bool IsKeyDown(SDL_Scancode key);
+bool IsKeyPressed(SDL_Scancode key);
 
 void DrawRect(const Rect& rect, const Color& color);
 void DrawTexture(Texture* texture, const Rect& rect, double degrees = 0.0f);

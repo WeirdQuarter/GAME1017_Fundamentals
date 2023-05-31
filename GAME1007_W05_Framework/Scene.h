@@ -27,6 +27,7 @@ public:
 		GAME,
 		LAB_1A,
 		LAB_1B,
+		LAB_2,
 		COUNT
 	};
 
@@ -120,4 +121,44 @@ private:
 	bool mMusicPlaying = false;
 
 	friend void OnLab1BGui(void* data);
+};
+
+class Lab2Scene : public Scene
+{
+public:
+	Lab2Scene();
+	~Lab2Scene() final;
+
+	void OnEnter() final;
+	void OnExit() final;
+
+	void OnUpdate(float dt) final;
+	void OnRender() final;
+
+private:
+
+	// Common between Turrent, Enemy, and Bullet
+	struct Entity
+	{
+		Rect rec;
+	};
+
+	struct Turret : public Entity
+	{
+		float cooldown = 1.0f;
+	};
+
+	struct Enemy : public Entity
+	{
+		float health = 100.0f;
+	};
+
+	struct Bullet : public Entity
+	{
+		float damage = 100.0f;
+	};
+
+	std::vector<Turret> mTurrets;
+	std::vector<Enemy> mEnemies;
+	std::vector<Bullet> mBullets;
 };

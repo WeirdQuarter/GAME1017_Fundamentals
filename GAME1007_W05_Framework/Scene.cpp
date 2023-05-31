@@ -14,7 +14,8 @@ void Scene::Init()
 	sScenes[GAME] = new GameScene;
 	sScenes[LAB_1A] = new Lab1AScene;
 	sScenes[LAB_1B] = new Lab1BScene;
-	sCurrent = LAB_1B;
+	sScenes[LAB_2] = new Lab2Scene;
+	sCurrent = LAB_2;
 	sScenes[sCurrent]->OnEnter();
 }
 
@@ -284,4 +285,52 @@ void Lab1BScene::OnUpdate(float dt)
 
 void Lab1BScene::OnRender()
 {
+}
+
+Lab2Scene::Lab2Scene()
+{
+}
+
+Lab2Scene::~Lab2Scene()
+{
+}
+
+void Lab2Scene::OnEnter()
+{
+}
+
+void Lab2Scene::OnExit()
+{
+}
+
+void Lab2Scene::OnUpdate(float dt)
+{
+	if (IsKeyPressed(SDL_SCANCODE_T))
+	{
+		Turret turret;
+		turret.rec.x = rand() % SCREEN_WIDTH;
+		turret.rec.y = rand() % SCREEN_HEIGHT;
+		turret.rec.w = 100.0f;
+		turret.rec.h = 100.0f;
+		mTurrets.push_back(turret);
+	}
+
+	if (IsKeyPressed(SDL_SCANCODE_E))
+	{
+		Enemy enemy;
+		enemy.rec.x = rand() % SCREEN_WIDTH;
+		enemy.rec.y = rand() % SCREEN_HEIGHT;
+		enemy.rec.w = 60.0f;
+		enemy.rec.h = 40.0f;
+		mEnemies.push_back(enemy);
+	}
+}
+
+void Lab2Scene::OnRender()
+{
+	for (const Turret& turret : mTurrets)
+		DrawRect(turret.rec, { 0, 255, 0, 255 });
+
+	for (const Enemy& enemy : mEnemies)
+		DrawRect(enemy.rec, { 255, 0, 0, 255 });
 }
