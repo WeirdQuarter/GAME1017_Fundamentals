@@ -13,7 +13,8 @@ void Scene::Init()
 	sScenes[TITLE] = new TitleScene;
 	sScenes[GAME] = new GameScene;
 	sScenes[LAB_1A] = new Lab1AScene;
-	sCurrent = LAB_1A;
+	sScenes[LAB_1B] = new Lab1BScene;
+	sCurrent = LAB_1B;
 	sScenes[sCurrent]->OnEnter();
 }
 
@@ -40,8 +41,6 @@ void Scene::Change(Type type)
 	sCurrent = type;
 	sScenes[sCurrent]->OnEnter();
 }
-
-void OnTitleGui(void* data);
 
 void TitleScene::OnEnter()
 {
@@ -71,8 +70,6 @@ void OnTitleGui(void* data)
 		Scene::Change(Scene::GAME);
 	}
 }
-
-void OnGameGui(void* data);
 
 GameScene::GameScene()
 {
@@ -211,4 +208,55 @@ void Lab1AScene::OnRender()
 {
 	for (const Ship& ship : mShips)
 		DrawTexture(ship.tex, ship.rec);
+}
+
+void OnLab1BGui(void* data)
+{
+	Lab1BScene& scene = *(Lab1BScene*)data;
+
+	if (ImGui::Button("Engine"))
+		PlaySound(scene.mEngine);
+
+	if (ImGui::Button("Explode"))
+		PlaySound(scene.mExplode);
+
+	if (ImGui::Button("Fire"))
+		PlaySound(scene.mFire);
+
+	if (ImGui::Button("Teleport"))
+		PlaySound(scene.mTeleport);
+}
+
+Lab1BScene::Lab1BScene()
+{
+	mEngine = LoadSound("../Assets/aud/Engines.wav");
+	mExplode = LoadSound("../Assets/aud/Explode.wav");
+	mFire = LoadSound("../Assets/aud/Fire.wav");
+	mTeleport = LoadSound("../Assets/aud/Teleport.wav");
+}
+
+Lab1BScene::~Lab1BScene()
+{
+	UnloadSound(mEngine);
+	UnloadSound(mExplode);
+	UnloadSound(mFire);
+	UnloadSound(mTeleport);
+}
+
+void Lab1BScene::OnEnter()
+{
+	SetGuiCallback(OnLab1BGui, this);
+}
+
+void Lab1BScene::OnExit()
+{
+	SetGuiCallback(nullptr, nullptr);
+}
+
+void Lab1BScene::OnUpdate(float dt)
+{
+}
+
+void Lab1BScene::OnRender()
+{
 }

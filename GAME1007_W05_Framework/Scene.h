@@ -5,6 +5,10 @@
 constexpr int SCREEN_WIDTH = 1024;
 constexpr int SCREEN_HEIGHT = 768;
 
+void OnTitleGui(void* data);
+void OnGameGui(void* data);
+void OnLab1BGui(void* data);
+
 class Scene
 {
 public:
@@ -92,4 +96,26 @@ private:
 	};
 
 	std::array<Ship, 6> mShips;
+};
+
+class Lab1BScene : public Scene
+{
+public:
+	Lab1BScene();
+	~Lab1BScene() final;
+
+	void OnEnter() final;
+	void OnExit() final;
+
+	void OnUpdate(float dt) final;
+	void OnRender() final;
+
+private:
+	Sound* mEngine = nullptr;
+	Sound* mExplode = nullptr;
+	Sound* mFire = nullptr;
+	Sound* mTeleport = nullptr;
+	Music* mMusic = nullptr;
+
+	friend void OnLab1BGui(void* data);
 };
