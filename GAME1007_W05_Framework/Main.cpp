@@ -3,6 +3,7 @@
 #include <array>
 #include <iostream>
 #include "tinyxml2.h"
+#include "Scene.h"
 using namespace tinyxml2;
 using namespace std;
 
@@ -182,39 +183,41 @@ void OnGui(void* data)
 
 int main(int argc, char* argv[])
 {
-	Car car;
-	LoadCar(car);
+	//Car car;
+	//LoadCar(car);
 	AppInit(1024, 768);
 
-	Music* music = LoadMusic("../Assets/aud/Wings.mp3");
+	//Music* music = LoadMusic("../Assets/aud/Wings.mp3");
 	//PlayMusic(music);
 
-	Game game;
-	LoadGame(game);
+	//Game game;
+	//LoadGame(game);
+	//
+	//game.shipTex = LoadTexture("../Assets/img/enterprise.png");
+	//game.sound1 = LoadSound("../Assets/aud/Fire.wav");
 
-	game.shipTex = LoadTexture("../Assets/img/enterprise.png");
-	game.sound1 = LoadSound("../Assets/aud/Fire.wav");
+	//SetGuiCallback(OnGui, &game);
 
-	//Custom custom;
-	//SDL_AddTimer(1000, CustomTimer, &custom);
-	//SDL_AddTimer(2000, Pause, (void*)"Music paused.");
-	//SDL_AddTimer(4000, Resume, (void*)"Music resumed!");
-
-	SetGuiCallback(OnGui, &game);
+	GameScene scene;
+	scene.OnEnter();
 
 	while (IsRunning())
 	{
-		Update(game, FrameTime());
+		scene.OnUpdate(FrameTime());
 		RenderBegin();
-		Render(game);
+		scene.OnRender();
 		RenderEnd();
+		//Update(game, FrameTime());
+		//RenderBegin();
+		//Render(game);
+		//RenderEnd();
 	}
+	scene.OnExit();
+	//SaveGame(game);
 
-	SaveGame(game);
-
-	UnloadTexture(game.shipTex);
-	UnloadMusic(music);
-	UnloadSound(game.sound1);
+	//UnloadTexture(game.shipTex);
+	//UnloadMusic(music);
+	//UnloadSound(game.sound1);
 	AppExit();
 	return 0;
 }
