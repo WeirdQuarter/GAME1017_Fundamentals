@@ -12,7 +12,8 @@ void Scene::Init()
 {
 	sScenes[TITLE] = new TitleScene;
 	sScenes[GAME] = new GameScene;
-	sCurrent = TITLE;
+	sScenes[LAB_1A] = new Lab1AScene;
+	sCurrent = LAB_1A;
 	sScenes[sCurrent]->OnEnter();
 }
 
@@ -151,4 +152,63 @@ void OnGameGui(void* data)
 	{
 		Scene::Change(Scene::TITLE);
 	}
+}
+
+Lab1AScene::Lab1AScene()
+{
+	mTexEnterprise = LoadTexture("../Assets/img/enterprise.png");
+	mTexD7 = LoadTexture("../Assets/img/d7.png");
+
+	for (size_t i = 0; i < mShips.size(); i++)
+	{
+		Ship& ship = mShips[i];
+		ship.rec.x = SCREEN_WIDTH * 0.1f;
+
+		const float space = SCREEN_HEIGHT / mShips.size();
+		ship.rec.y = i * space + space * 0.5f;
+
+		ship.rec.w = 60.0f;
+		ship.rec.h = 40.0f;
+
+		ship.dir = { 1.0f, 1.0f };
+
+		if (i % 2 == 0)
+			ship.tex = mTexEnterprise;
+		else
+			ship.tex = mTexD7;
+	}
+}
+
+Lab1AScene::~Lab1AScene()
+{
+	UnloadTexture(mTexD7);
+	UnloadTexture(mTexEnterprise);
+}
+
+void Lab1AScene::OnUpdate(float dt)
+{
+	const float speed = 500.0f;
+	for (Ship& ship : mShips)
+	{
+		Rect& rec = ship.rec;
+
+		if (rec.x + rec.w >= SCREEN_WIDTH)
+			ship.dir.x = -1.0f;
+		else if (rec.x <= 0.0f)
+			ship.dir.x = 1.0f;
+
+		if (rec.y + rec.h >= SCREEN_HEIGHT)
+			ship.dir.y = -1.0f;
+		else if (rec.y <= 0.0f)
+			ship.dir.y = 1.0f;
+
+		rec.x += ship.dir.x * speed * dt;
+		rec.y += ship.dir.y * speed * dt;
+	}
+}
+
+void Lab1AScene::OnRender()
+{
+	for (const Ship& ship : mShips)
+		DrawTexture(ship.tex, ship.rec);
 }

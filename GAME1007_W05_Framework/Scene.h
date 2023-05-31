@@ -21,6 +21,8 @@ public:
 	{
 		TITLE,
 		GAME,
+		LAB_1A,
+		LAB_1B,
 		COUNT
 	};
 
@@ -55,7 +57,7 @@ class GameScene : public Scene
 {
 public:
 	GameScene();
-	virtual ~GameScene();
+	~GameScene() final;
 
 	void OnEnter() final;
 	void OnExit() final;
@@ -67,4 +69,27 @@ private:
 	Texture* mShipTex = nullptr;
 	Rect mShipRec;
 	float mShipSpeed;
+};
+
+class Lab1AScene : public Scene
+{
+public:
+	Lab1AScene();
+	~Lab1AScene() final;
+
+	void OnUpdate(float dt) final;
+	void OnRender() final;
+
+private:
+	Texture* mTexEnterprise = nullptr;
+	Texture* mTexD7 = nullptr;
+
+	struct Ship
+	{
+		Rect rec;
+		Point dir;
+		Texture* tex;
+	};
+
+	std::array<Ship, 6> mShips;
 };
