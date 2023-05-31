@@ -117,5 +117,7 @@ private:
 	Sound* mTeleport = nullptr;
 	Music* mMusic = nullptr;
 
+	bool mMusicPlaying = false;
+
 	friend void OnLab1BGui(void* data);
 };

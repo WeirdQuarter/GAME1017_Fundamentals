@@ -214,6 +214,23 @@ void OnLab1BGui(void* data)
 {
 	Lab1BScene& scene = *(Lab1BScene*)data;
 
+	if (scene.mMusicPlaying)
+	{
+		if (ImGui::Button("Pause"))
+		{
+			scene.mMusicPlaying = false;
+			PauseMusic();
+		}
+	}
+	else
+	{
+		if (ImGui::Button("Resume"))
+		{
+			scene.mMusicPlaying = true;
+			ResumeMusic();
+		}
+	}
+
 	if (ImGui::Button("Engine"))
 		PlaySound(scene.mEngine);
 
@@ -233,10 +250,18 @@ Lab1BScene::Lab1BScene()
 	mExplode = LoadSound("../Assets/aud/Explode.wav");
 	mFire = LoadSound("../Assets/aud/Fire.wav");
 	mTeleport = LoadSound("../Assets/aud/Teleport.wav");
+	mMusic = LoadMusic("../Assets/aud/Wings.mp3");
+
+	// Pause/Resume music() pause/resume the stream, but they don't play.
+	// Hence, we need to ensure our music is playing before pausing/resuming!
+	PlayMusic(mMusic);
+	if (!mMusicPlaying)
+		PauseMusic();
 }
 
 Lab1BScene::~Lab1BScene()
 {
+	UnloadMusic(mMusic);
 	UnloadSound(mEngine);
 	UnloadSound(mExplode);
 	UnloadSound(mFire);
