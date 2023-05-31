@@ -85,6 +85,8 @@ GameScene::~GameScene()
 
 void GameScene::OnEnter()
 {
+	SetGuiCallback(OnGameGui, this);
+
 	XMLDocument doc;
 	doc.LoadFile("Game.xml");
 
@@ -95,8 +97,6 @@ void GameScene::OnEnter()
 	shipData->QueryAttribute("w", &mShipRec.w);
 	shipData->QueryAttribute("h", &mShipRec.h);
 	shipData->QueryAttribute("speed", &mShipSpeed);
-
-	cout << "Loaded " << gameData->Value() << endl;
 }
 
 void GameScene::OnExit()
@@ -114,6 +114,8 @@ void GameScene::OnExit()
 	root->InsertEndChild(ship);
 
 	doc.SaveFile("Game.xml");
+
+	SetGuiCallback(nullptr, nullptr);
 }
 
 void GameScene::OnUpdate(float dt)
@@ -145,8 +147,8 @@ void OnGameGui(void* data)
 {
 	GameScene& scene = *(GameScene*)data;
 
-	if (ImGui::Button("Fire!"))
+	if (ImGui::Button("End"))
 	{
-		//PlaySound(game.sound1);
+		Scene::Change(Scene::TITLE);
 	}
 }
