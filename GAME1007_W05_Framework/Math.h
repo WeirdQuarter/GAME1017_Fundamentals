@@ -30,3 +30,16 @@ inline float DistanceSqr(Point a, Point b)
 	float dy = a.y - b.y;
 	return dx * dx + dy * dy;
 }
+
+inline float Length(Point p)
+{
+	return sqrtf(p.x * p.x + p.y * p.y);
+}
+
+inline Point Normalize(Point p)
+{
+	float length = Length(p);
+	if (length > 0.0f)
+		return { p.x / length, p.y / length };
+	return {};
+}

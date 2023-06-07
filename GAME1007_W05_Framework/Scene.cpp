@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <functional>
 using namespace std;
 using namespace tinyxml2;
 
@@ -326,22 +327,55 @@ void Lab2Scene::OnUpdate(float dt)
 		mEnemies.push_back(enemy);
 	}
 
-	for (size_t i = 0; i < mTurrets.size(); i++)
+	for (Turret& turret : mTurrets)
 	{
-		mTurrets[i].cooldown -= dt;
+		turret.cooldown -= dt;
+		if (turret.cooldown <= 0.0f)
+		{
+			turret.cooldown = 1.0f;
 
-		//if (mTurrets[i].cooldown <= 0.0f)
-		//{
-		//	mTurrets.erase(mTurrets.begin() + i);
-		//}
+			// Find the nearest enemy to shoot at:
+			float nearestDistance = FLT_MAX;
+			const Enemy* nearestEnemy = nullptr;
+
+			for (const Enemy& enemy : mEnemies)
+			{
+				float distance = Distance({ turret.rec.x, turret.rec.y }, { enemy.rec.x, enemy.rec.y });
+				if (distance < nearestDistance)
+				{
+					nearestDistance = distance;
+					nearestEnemy = &enemy;
+				}
+			}
+
+			if (nearestEnemy != nullptr)
+			{
+				// AB = B - A
+				Bullet bullet;
+				bullet.rec.w = 10.0f;
+				bullet.rec.h = 10.0f;
+				bullet.direction = Normalize({ nearestEnemy->rec.x - turret.rec.x, nearestEnemy->rec.y - turret.rec.y });
+				bullet.rec.x = turret.rec.x + turret.rec.w * bullet.direction.x;
+				bullet.rec.y = turret.rec.y + turret.rec.h * bullet.direction.y;
+				mBullets.push_back(bullet);
+			}
+		}
 	}
 
-	mTurrets.erase(remove_if(mTurrets.begin(), mTurrets.end(),
-		[this](const Turret& turret)
-		{
-			return turret.cooldown <= 0.0f;
-		}),
-	mTurrets.end());
+	for (Bullet& bullet : mBullets)
+	{
+		float speed = 100.0f * dt;
+		bullet.rec.x += bullet.direction.x * speed;
+		bullet.rec.y += bullet.direction.y * speed;
+	}
+
+	// Optimized remove that sorts all turrets based on true/false condition, then removes all turrets with true condition.
+	//mTurrets.erase(remove_if(mTurrets.begin(), mTurrets.end(),
+	//	[this](const Turret& turret)
+	//	{
+	//		return turret.cooldown <= 0.0f;
+	//	}),
+	//mTurrets.end());
 }
 
 void Lab2Scene::OnRender()
@@ -351,9 +385,7 @@ void Lab2Scene::OnRender()
 
 	for (const Enemy& enemy : mEnemies)
 		DrawRect(enemy.rec, { 255, 0, 0, 255 });
-}
 
-bool Lab2Scene::RemoveTurret(Turret& turret)
-{
-	return turret.cooldown <= 0.0f;
+	for (const Bullet& bullet : mBullets)
+		DrawRect(bullet.rec, { 0, 0, 255, 255 });
 }

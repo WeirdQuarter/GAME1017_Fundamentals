@@ -156,9 +156,8 @@ private:
 	struct Bullet : public Entity
 	{
 		float damage = 100.0f;
+		Point direction;
 	};
-
-	bool RemoveTurret(Turret& turret);
 
 	std::vector<Turret> mTurrets;
 	std::vector<Enemy> mEnemies;
