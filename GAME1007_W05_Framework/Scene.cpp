@@ -183,6 +183,8 @@ Lab1AScene::~Lab1AScene()
 	UnloadTexture(mTexEnterprise);
 }
 
+#include "Math.h"
+
 void Lab1AScene::OnUpdate(float dt)
 {
 	const float speed = 500.0f;
