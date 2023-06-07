@@ -23,6 +23,7 @@ void Scene::Init()
 
 void Scene::Exit()
 {
+	sScenes[sCurrent]->OnExit();
 	for (size_t i = 0; i < sScenes.size(); i++)
 		delete sScenes[i];
 }
@@ -299,32 +300,54 @@ Lab2Scene::~Lab2Scene()
 
 void Lab2Scene::OnEnter()
 {
-	//mBullet.rec.x = 100.0f;
-	//mBullet.rec.y = 125.0f;
-	//mBullet.rec.w = 10.0f;
-	//mBullet.rec.h = 10.0f;
-	//
-	//mEnemy.rec.w = 50.0f;
-	//mEnemy.rec.h = 50.0f;
-	//mEnemy.rec.x = 400.0f;
-	//mEnemy.rec.y = 100.0f;
-
 	// TODO - load turret positions and kills
+	XMLDocument doc;
+	doc.LoadFile("Turrets.xml");
+
+	XMLElement* element = doc.FirstChildElement();
+	while (element != nullptr)
+	{
+		int kills = 0;
+		float cooldown = 1.0f;
+		Rect rec;
+		element->QueryAttribute("kills", &kills);
+		element->QueryAttribute("cooldown", &cooldown);
+		element->QueryAttribute("x", &rec.x);
+		element->QueryAttribute("y", &rec.y);
+		element->QueryAttribute("w", &rec.w);
+		element->QueryAttribute("h", &rec.h);
+		
+		Turret turret;
+		turret.rec = rec;
+		turret.cooldown = cooldown;
+		turret.kills = kills;
+		mTurrets.push_back(turret);
+
+		element = element->NextSiblingElement();
+	}
+	cout << "Lit!";
 }
 
 void Lab2Scene::OnExit()
 {
 	// TODO - save turret positions and kills
+	XMLDocument doc;
+	for (const Turret& turret : mTurrets)
+	{
+		XMLElement* element = doc.NewElement("Turret");
+		element->SetAttribute("x", turret.rec.x);
+		element->SetAttribute("y", turret.rec.y);
+		element->SetAttribute("w", turret.rec.w);
+		element->SetAttribute("h", turret.rec.h);
+		element->SetAttribute("kills", turret.kills);
+		element->SetAttribute("cooldown", turret.cooldown);
+		doc.InsertEndChild(element);
+	}
+	doc.SaveFile("Turrets.xml");
 }
 
 void Lab2Scene::OnUpdate(float dt)
 {
-	//mBullet.rec.x += 100.0f * dt;
-	//if (SDL_HasIntersectionF(&mBullet.rec, &mEnemy.rec))
-	//{
-	//	mBullet.rec.x = 100.0f;
-	//}
-
 	if (IsKeyPressed(SDL_SCANCODE_T))
 	{
 		Turret turret;
@@ -334,6 +357,9 @@ void Lab2Scene::OnUpdate(float dt)
 		turret.rec.h = 100.0f;
 		mTurrets.push_back(turret);
 	}
+
+	if (IsKeyPressed(SDL_SCANCODE_R))
+		mTurrets.pop_back();
 
 	if (IsKeyPressed(SDL_SCANCODE_E))
 	{
@@ -375,35 +401,63 @@ void Lab2Scene::OnUpdate(float dt)
 				bullet.direction = Normalize({ nearestEnemy->rec.x - turret.rec.x, nearestEnemy->rec.y - turret.rec.y });
 				bullet.rec.x = turret.rec.x + turret.rec.w * bullet.direction.x;
 				bullet.rec.y = turret.rec.y + turret.rec.h * bullet.direction.y;
+				bullet.parent = &turret;
 				mBullets.push_back(bullet);
 			}
 		}
 	}
-
-	// TODO -- remove bullets that go off-screen
+	
 	for (Bullet& bullet : mBullets)
 	{
 		float speed = 100.0f * dt;
 		bullet.rec.x += bullet.direction.x * speed;
 		bullet.rec.y += bullet.direction.y * speed;
-
-		// TODO -- remove enemies that are hit by bullets
 	}
 
-	// Optimized remove that sorts all turrets based on true/false condition, then removes all turrets with true condition.
-	//mTurrets.erase(remove_if(mTurrets.begin(), mTurrets.end(),
-	//	[this](const Turret& turret)
-	//	{
-	//		return turret.cooldown <= 0.0f;
-	//	}),
-	//mTurrets.end());
+	// Remove if colliding with enemy or off-screen
+	mBullets.erase(remove_if(mBullets.begin(), mBullets.end(),
+		[this](const Bullet& bullet)
+		{
+			// Check if the bullet is on-screen before checking it against every enemy
+			Rect screen{ 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
+			if (!SDL_HasIntersectionF(&bullet.rec, &screen)) return true;
+
+			for (Enemy& enemy : mEnemies)
+			{
+				if (SDL_HasIntersectionF(&bullet.rec, &enemy.rec))
+				{
+					enemy.health -= bullet.damage;
+					if (enemy.health <= 0.0f)
+						bullet.parent->kills++;
+					return true;
+				}
+			}
+
+			// Bullet is on-screen and not colliding with any enemies
+			return false;
+		}),
+	mBullets.end());
+
+	// Remove dead enemies
+	mEnemies.erase(remove_if(mEnemies.begin(), mEnemies.end(),
+		[this](const Enemy& enemy)
+		{
+			return enemy.health <= 0.0f;
+		}),
+	mEnemies.end());
+
+	static float timer = 1.0f;
+	timer -= dt;
+	if (timer <= 0.0f)
+	{
+		timer = 1.0f;
+		cout << "Enemies: " << mBullets.size() << endl;
+		cout << "Bullets: " << mBullets.size() << endl;
+	}
 }
 
 void Lab2Scene::OnRender()
 {
-	//DrawRect(mBullet.rec, { 0, 0, 255, 255 });
-	//DrawRect(mEnemy.rec, { 255, 0, 0, 255 });
-	
 	for (const Turret& turret : mTurrets)
 		DrawRect(turret.rec, { 0, 255, 0, 255 });
 	

@@ -136,8 +136,6 @@ public:
 	void OnRender() final;
 
 private:
-
-	// Common between Turrent, Enemy, and Bullet
 	struct Entity
 	{
 		Rect rec;
@@ -146,6 +144,7 @@ private:
 	struct Turret : public Entity
 	{
 		float cooldown = 1.0f;
+		int kills = 0;
 	};
 
 	struct Enemy : public Entity
@@ -155,13 +154,10 @@ private:
 
 	struct Bullet : public Entity
 	{
-		float damage = 100.0f;
+		float damage = 10.0f;
 		Point direction;
+		Turret* parent = nullptr;
 	};
-
-	// Uncomment for collision example
-	//Bullet mBullet;
-	//Enemy mEnemy;
 
 	std::vector<Turret> mTurrets;
 	std::vector<Enemy> mEnemies;
