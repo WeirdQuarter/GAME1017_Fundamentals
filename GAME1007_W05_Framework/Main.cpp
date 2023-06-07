@@ -27,32 +27,6 @@ struct Car
 	float mass;
 };
 
-void Update(Game& game, float dt)
-{
-	//game.shipRec.x += game.shipSpeed * dt;
-	if (IsKeyDown(SDL_SCANCODE_A))
-	{
-		game.shipRec.x -= game.shipSpeed * dt;
-	}
-	if (IsKeyDown(SDL_SCANCODE_D))
-	{
-		game.shipRec.x += game.shipSpeed * dt;
-	}
-	if (IsKeyDown(SDL_SCANCODE_W))
-	{
-		game.shipRec.y -= game.shipSpeed * dt;
-	}
-	if (IsKeyDown(SDL_SCANCODE_S))
-	{
-		game.shipRec.y += game.shipSpeed * dt;
-	}
-}
-
-void Render(const Game& game)
-{
-	DrawTexture(game.shipTex, game.shipRec);
-}
-
 void SaveCar()
 {
 	XMLDocument doc;	//DOM tree (in-memory representation of xml document)
@@ -183,21 +157,7 @@ void OnGui(void* data)
 
 int main(int argc, char* argv[])
 {
-	//Car car;
-	//LoadCar(car);
 	AppInit(1024, 768);
-
-	//Music* music = LoadMusic("../Assets/aud/Wings.mp3");
-	//PlayMusic(music);
-
-	//Game game;
-	//LoadGame(game);
-	//
-	//game.shipTex = LoadTexture("../Assets/img/enterprise.png");
-	//game.sound1 = LoadSound("../Assets/aud/Fire.wav");
-
-	//SetGuiCallback(OnGui, &game);
-
 	Scene::Init();
 	while (IsRunning())
 	{
@@ -205,17 +165,8 @@ int main(int argc, char* argv[])
 		RenderBegin();
 		Scene::Render();
 		RenderEnd();
-		//Update(game, FrameTime());
-		//RenderBegin();
-		//Render(game);
-		//RenderEnd();
 	}
 	Scene::Exit();
-
-	//SaveGame(game);
-	//UnloadTexture(game.shipTex);
-	//UnloadMusic(music);
-	//UnloadSound(game.sound1);
 	AppExit();
 	return 0;
 }
