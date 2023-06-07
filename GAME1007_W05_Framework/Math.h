@@ -17,14 +17,14 @@ using Point = SDL_FPoint;
 	// SDL_PointInFRect(reinterpret_cast<SDL_FPoint*>(&v), &rec);
 };*/
 
-float Distance(Point a, Point b)
+inline float Distance(Point a, Point b)
 {
 	float dx = a.x - b.x;
 	float dy = a.y - b.y;
 	return sqrtf(dx * dx + dy * dy);
 }
 
-float DistanceSqr(Point a, Point b)
+inline float DistanceSqr(Point a, Point b)
 {
 	float dx = a.x - b.x;
 	float dy = a.y - b.y;

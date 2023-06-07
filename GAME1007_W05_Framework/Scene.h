@@ -158,6 +158,8 @@ private:
 		float damage = 100.0f;
 	};
 
+	bool RemoveTurret(Turret& turret);
+
 	std::vector<Turret> mTurrets;
 	std::vector<Enemy> mEnemies;
 	std::vector<Bullet> mBullets;

@@ -2,6 +2,7 @@
 #include "tinyxml2.h"
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 using namespace std;
 using namespace tinyxml2;
 
@@ -324,6 +325,23 @@ void Lab2Scene::OnUpdate(float dt)
 		enemy.rec.h = 40.0f;
 		mEnemies.push_back(enemy);
 	}
+
+	for (size_t i = 0; i < mTurrets.size(); i++)
+	{
+		mTurrets[i].cooldown -= dt;
+
+		//if (mTurrets[i].cooldown <= 0.0f)
+		//{
+		//	mTurrets.erase(mTurrets.begin() + i);
+		//}
+	}
+
+	mTurrets.erase(remove_if(mTurrets.begin(), mTurrets.end(),
+		[this](const Turret& turret)
+		{
+			return turret.cooldown <= 0.0f;
+		}),
+	mTurrets.end());
 }
 
 void Lab2Scene::OnRender()
@@ -333,4 +351,9 @@ void Lab2Scene::OnRender()
 
 	for (const Enemy& enemy : mEnemies)
 		DrawRect(enemy.rec, { 255, 0, 0, 255 });
+}
+
+bool Lab2Scene::RemoveTurret(Turret& turret)
+{
+	return turret.cooldown <= 0.0f;
 }
