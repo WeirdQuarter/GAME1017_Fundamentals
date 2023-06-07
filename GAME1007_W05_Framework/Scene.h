@@ -159,6 +159,10 @@ private:
 		Point direction;
 	};
 
+	// Uncomment for collision example
+	//Bullet mBullet;
+	//Enemy mEnemy;
+
 	std::vector<Turret> mTurrets;
 	std::vector<Enemy> mEnemies;
 	std::vector<Bullet> mBullets;

@@ -299,14 +299,32 @@ Lab2Scene::~Lab2Scene()
 
 void Lab2Scene::OnEnter()
 {
+	//mBullet.rec.x = 100.0f;
+	//mBullet.rec.y = 125.0f;
+	//mBullet.rec.w = 10.0f;
+	//mBullet.rec.h = 10.0f;
+	//
+	//mEnemy.rec.w = 50.0f;
+	//mEnemy.rec.h = 50.0f;
+	//mEnemy.rec.x = 400.0f;
+	//mEnemy.rec.y = 100.0f;
+
+	// TODO - load turret positions and kills
 }
 
 void Lab2Scene::OnExit()
 {
+	// TODO - save turret positions and kills
 }
 
 void Lab2Scene::OnUpdate(float dt)
 {
+	//mBullet.rec.x += 100.0f * dt;
+	//if (SDL_HasIntersectionF(&mBullet.rec, &mEnemy.rec))
+	//{
+	//	mBullet.rec.x = 100.0f;
+	//}
+
 	if (IsKeyPressed(SDL_SCANCODE_T))
 	{
 		Turret turret;
@@ -362,11 +380,14 @@ void Lab2Scene::OnUpdate(float dt)
 		}
 	}
 
+	// TODO -- remove bullets that go off-screen
 	for (Bullet& bullet : mBullets)
 	{
 		float speed = 100.0f * dt;
 		bullet.rec.x += bullet.direction.x * speed;
 		bullet.rec.y += bullet.direction.y * speed;
+
+		// TODO -- remove enemies that are hit by bullets
 	}
 
 	// Optimized remove that sorts all turrets based on true/false condition, then removes all turrets with true condition.
@@ -380,12 +401,15 @@ void Lab2Scene::OnUpdate(float dt)
 
 void Lab2Scene::OnRender()
 {
+	//DrawRect(mBullet.rec, { 0, 0, 255, 255 });
+	//DrawRect(mEnemy.rec, { 255, 0, 0, 255 });
+	
 	for (const Turret& turret : mTurrets)
 		DrawRect(turret.rec, { 0, 255, 0, 255 });
-
+	
 	for (const Enemy& enemy : mEnemies)
 		DrawRect(enemy.rec, { 255, 0, 0, 255 });
-
+	
 	for (const Bullet& bullet : mBullets)
 		DrawRect(bullet.rec, { 0, 0, 255, 255 });
 }
