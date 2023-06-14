@@ -2,7 +2,6 @@
 #include <SDL.h>
 #include <cmath>
 
-// Constants
 using Rect = SDL_FRect;
 using Point = SDL_FPoint;
 
@@ -22,7 +21,13 @@ using Point = SDL_FPoint;
 #define RAD2DEG (180.0f/PI)
 #endif
 
-// Scalar math
+// Random number between min and max (can be negative)
+inline float Random(float min, float max)
+{
+	return min + (rand() / ((float)RAND_MAX / (max - min)));
+}
+
+// Clamps value between min and max
 inline float Clamp(float value, float min, float max)
 {
 	float result = (value < min) ? min : value;
@@ -32,7 +37,7 @@ inline float Clamp(float value, float min, float max)
 	return result;
 }
 
-// Vector math
+// Vector addition
 inline Point operator+(Point a, Point b)
 {
 	Point result{ a.x + b.x, a.y + b.y };
@@ -40,6 +45,7 @@ inline Point operator+(Point a, Point b)
 	return result;
 }
 
+// Vector subtraction
 inline Point operator-(Point a, Point b)
 {
 	Point result{ a.x - b.x, a.y - b.y };
@@ -47,6 +53,7 @@ inline Point operator-(Point a, Point b)
 	return result;
 }
 
+// Vector-scalar multiplication
 inline Point operator*(Point a, float b)
 {
 	Point result{ a.x * b, a.y * b };
@@ -54,6 +61,7 @@ inline Point operator*(Point a, float b)
 	return result;
 }
 
+// Vector-scalar division
 inline Point operator/(Point a, float b)
 {
 	Point result{ a.x / b, a.y / b };
@@ -61,20 +69,27 @@ inline Point operator/(Point a, float b)
 	return result;
 }
 
+// Distance between two points (c = sqrt(a^2 + b^2))
 inline float Distance(Point a, Point b)
 {
 	float dx = a.x - b.x;
 	float dy = a.y - b.y;
-	return sqrtf(dx * dx + dy * dy);
+	float result = sqrtf(dx * dx + dy * dy);
+
+	return result;
 }
 
+// Squared distance between two points (c^2 = a^2 + b^2)
 inline float DistanceSqr(Point a, Point b)
 {
 	float dx = a.x - b.x;
 	float dy = a.y - b.y;
-	return dx * dx + dy * dy;
+	float result = dx * dx + dy * dy;
+
+	return result;
 }
 
+// Magnitude of a vector (distance between point and origin [0, 0])
 inline float Length(Point p)
 {
 	float result = sqrtf(p.x * p.x + p.y * p.y);
@@ -82,6 +97,7 @@ inline float Length(Point p)
 	return result;
 }
 
+// Squared magnitude of a vector (squared distance between point and origin [0, 0])
 inline float LengthSqr(Point p)
 {
 	float result = p.x * p.x + p.y * p.y;
@@ -89,35 +105,23 @@ inline float LengthSqr(Point p)
 	return result;
 }
 
-inline Point Normalize(Point p)
+// https://www.mathsisfun.com/algebra/vectors-dot-product.html
+inline float Dot(Point a, Point b)
 {
-	float length = Length(p);
-	if (length > 0.0f)
-		return { p.x / length, p.y / length };
-	return {};
-}
-
-inline float Dot(Point v1, Point v2)
-{
-	float result = (v1.x * v2.x + v1.y * v2.y);
+	float result = (a.x * b.x + a.y * b.y);
 
 	return result;
 }
 
-inline float Cross(Point v1, Point v2)
+// https://www.mathsisfun.com/algebra/vectors-cross-product.html 
+inline float Cross(Point a, Point b)
 {
-	float result = v1.x * v2.y - v1.y * v2.x;
+	float result = a.x * b.y - a.y * b.x;
 
 	return result;
 }
 
-inline Point Direction(float angle)
-{
-	Point result = { cosf(angle), sinf(angle) };
-
-	return result;
-}
-
+// Convert direction (unit vector) to angle in radians
 inline float Angle(Point p)
 {
 	float result = atan2f(p.y, p.x);
@@ -125,42 +129,63 @@ inline float Angle(Point p)
 	return result;
 }
 
-// Project v1 onto v2
-inline Point Project(Point v1, Point v2)
+// Convert angle in radians to direction (unit vector)
+inline Point Direction(float angle/*radians*/)
 {
-	float t = Dot(v1, v2) / Dot(v2, v2);
-	return { t * v2.x, t * v2.y };
-}
-
-// Returns the point on line AB nearest to point P
-inline Point NearestPoint(Point A, Point B, Point P)
-{
-	Point AB = B - A;
-	float t = Dot(P - A, AB) / Dot(AB, AB);
-	return A + AB * Clamp(t, 0.0f, 1.0f);
-}
-
-// Rotate vector by angle
-inline Point Rotate(Point v, float angle)
-{
-	Point result = { 0 };
-
-	float cosres = cosf(angle);
-	float sinres = sinf(angle);
-
-	result.x = v.x * cosres - v.y * sinres;
-	result.y = v.x * sinres + v.y * cosres;
+	Point result = { cosf(angle), sinf(angle) };
 
 	return result;
 }
 
-// Calculate linear interpolation between two vectors
-inline Point Lerp(Point v1, Point v2, float amount)
+// Vector projection
+inline Point Project(Point a, Point b)
 {
-	Point result = { 0 };
+	float t = Dot(a, b) / Dot(b, b);
+	Point result = { t * b.x, t * b.y };
 
-	result.x = v1.x + amount * (v2.x - v1.x);
-	result.y = v1.y + amount * (v2.y - v1.y);
+	return result;
+}
+
+// Project point P onto line AB 
+inline Point ProjectPointLine(Point a, Point b, Point p)
+{
+	Point AB = b - a;
+	float t = Dot(p - a, AB) / Dot(AB, AB);
+	Point result = a + AB * Clamp(t, 0.0f, 1.0f);
+
+	return result;
+}
+
+// Vector normalization; produces a unit vector (magnitude of 1)
+inline Point Normalize(Point p)
+{
+	Point result{};
+
+	float length = Length(p);
+	if (length > 0.0f)
+		result = { p.x / length, p.y / length };
+
+	return result;
+}
+
+// Rotate point P by angle in radians
+inline Point Rotate(Point p, float angle/*radians*/)
+{
+	Point result{};
+
+	float cosres = cosf(angle);
+	float sinres = sinf(angle);
+
+	result.x = p.x * cosres - p.y * sinres;
+	result.y = p.x * sinres + p.y * cosres;
+
+	return result;
+}
+
+// Interpolate between A and B based on t (0 = fully A, 1 = fully B)
+inline Point Lerp(Point a, Point b, float t)
+{
+	Point result = a + (b - a) * t;
 
 	return result;
 }
