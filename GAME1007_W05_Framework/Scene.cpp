@@ -300,7 +300,6 @@ Lab2Scene::~Lab2Scene()
 
 void Lab2Scene::OnEnter()
 {
-	// TODO - load turret positions and kills
 	XMLDocument doc;
 	doc.LoadFile("Turrets.xml");
 
@@ -325,12 +324,10 @@ void Lab2Scene::OnEnter()
 
 		element = element->NextSiblingElement();
 	}
-	cout << "Lit!";
 }
 
 void Lab2Scene::OnExit()
 {
-	// TODO - save turret positions and kills
 	XMLDocument doc;
 	for (const Turret& turret : mTurrets)
 	{
@@ -415,43 +412,87 @@ void Lab2Scene::OnUpdate(float dt)
 	}
 
 	// Remove if colliding with enemy or off-screen
-	mBullets.erase(remove_if(mBullets.begin(), mBullets.end(),
-		[this](const Bullet& bullet)
-		{
-			// Check if the bullet is on-screen before checking it against every enemy
-			Rect screen{ 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
-			if (!SDL_HasIntersectionF(&bullet.rec, &screen)) return true;
+	//mBullets.erase(remove_if(mBullets.begin(), mBullets.end(),
+	//	[this](const Bullet& bullet)
+	//	{
+	//		// Check if the bullet is on-screen before checking it against every enemy
+	//		Rect screen{ 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
+	//		if (!SDL_HasIntersectionF(&bullet.rec, &screen)) return true;
+	//
+	//		for (Enemy& enemy : mEnemies)
+	//		{
+	//			if (SDL_HasIntersectionF(&bullet.rec, &enemy.rec))
+	//			{
+	//				enemy.health -= bullet.damage;
+	//				if (enemy.health <= 0.0f)
+	//					bullet.parent->kills++;
+	//				return true;
+	//			}
+	//		}
+	//
+	//		// Bullet is on-screen and not colliding with any enemies
+	//		return false;
+	//	}),
+	//mBullets.end());
 
+	for (size_t i = 0; i < mBullets.size(); i++)
+	{
+		Bullet& bullet = mBullets[i];
+		bool erase = false;
+
+		// Check if the bullet is on-screen before checking it against every enemy
+		Rect screen{ 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
+		if (!SDL_HasIntersectionF(&bullet.rec, &screen)) erase = true;
+
+		if (!erase)
+		{
 			for (Enemy& enemy : mEnemies)
 			{
 				if (SDL_HasIntersectionF(&bullet.rec, &enemy.rec))
 				{
 					enemy.health -= bullet.damage;
 					if (enemy.health <= 0.0f)
+					{
 						bullet.parent->kills++;
-					return true;
+						erase = true;
+						break;
+					}
 				}
 			}
-
-			// Bullet is on-screen and not colliding with any enemies
-			return false;
-		}),
-	mBullets.end());
+		}
+		
+		// Bullet is either off-screen, or colliding with enemy
+		if (erase)
+		{
+			mBullets.erase(mBullets.begin() + i);
+			i--;
+		}
+	}
 
 	// Remove dead enemies
-	mEnemies.erase(remove_if(mEnemies.begin(), mEnemies.end(),
-		[this](const Enemy& enemy)
+	//mEnemies.erase(remove_if(mEnemies.begin(), mEnemies.end(),
+	//	[this](const Enemy& enemy)
+	//	{
+	//		return enemy.health <= 0.0f;
+	//	}),
+	//mEnemies.end());
+
+	for (size_t i = 0; i < mEnemies.size(); i++)
+	{
+		if (mEnemies[i].health <= 0.0f)
 		{
-			return enemy.health <= 0.0f;
-		}),
-	mEnemies.end());
+			mEnemies.erase(mEnemies.begin() + i);
+			i--;
+			// Must decrement iterator to ensure no elements get skipped
+		}
+	}
 
 	static float timer = 1.0f;
 	timer -= dt;
 	if (timer <= 0.0f)
 	{
 		timer = 1.0f;
-		cout << "Enemies: " << mBullets.size() << endl;
+		cout << "Enemies: " << mEnemies.size() << endl;
 		cout << "Bullets: " << mBullets.size() << endl;
 	}
 }
