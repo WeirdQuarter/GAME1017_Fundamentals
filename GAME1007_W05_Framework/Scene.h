@@ -214,10 +214,19 @@ private:
 
 	struct Bullet : public Entity
 	{
-		// Make this re-usable in the future if viable
 		void Draw() const
 		{
-			DrawRect(Collider(), { 0, 0, 128, 255 });
+			DrawRect(Collider(), { 255, 0, 0, 255 });
+			DrawLine(position, position + direction * 20.0f);
+		}
+	};
+
+	// Add on to this class if necessary
+	struct Asteroid : public Entity
+	{
+		void Draw() const
+		{
+			DrawRect(Collider(), { 255, 0, 255, 255 });
 			DrawLine(position, position + direction * 20.0f);
 		}
 	};
@@ -237,4 +246,9 @@ private:
 	} mShip;
 
 	std::vector<Bullet> mBullets;
+
+	// TODO -- make two vectors, one for medium asteroids, one for small asteroids.
+	// When a bullet hits a medium asteroid, it should destroy it then spawn two smaller asteroids.
+	// These two small asteroids should travel in a direction 30-45 degrees adjacent to the medium asteroid.
+	// Hint: small.direction = Rotate(medium.direction, Random(30.0f, 45.0f) * DEG2RAD * dt);
 };
