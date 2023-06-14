@@ -520,6 +520,16 @@ void AsteroidsScene::OnUpdate(float dt)
 	{
 		bullet.position = bullet.position + bullet.velocity * dt;
 	}
+
+	// TODO:
+	// Asteroid spawn - create asteroid if timer expired, then reset timer
+	// Asteroid update - move asteroids based on velocity
+	// Asteroid teleport - if x > SCREEN_WIDTH, x = 0 etc
+
+	// TODO:
+	// Bullet collision - remove if off screen or hitting asteroid
+	// Handle small vs medium asteroids accordingly
+	// Hint: small.direction = Rotate(medium.direction, Random(30.0f, 45.0f) * DEG2RAD * dt);
 }
 
 void AsteroidsScene::OnRender()
