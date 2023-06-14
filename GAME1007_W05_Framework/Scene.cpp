@@ -17,7 +17,8 @@ void Scene::Init()
 	sScenes[LAB_1A] = new Lab1AScene;
 	sScenes[LAB_1B] = new Lab1BScene;
 	sScenes[LAB_2] = new Lab2Scene;
-	sCurrent = LAB_2;
+	sScenes[ASTEROIDS] = new AsteroidsScene;
+	sCurrent = ASTEROIDS;
 	sScenes[sCurrent]->OnEnter();
 }
 
@@ -454,4 +455,76 @@ void Lab2Scene::OnRender()
 	
 	for (const Bullet& bullet : mBullets)
 		DrawRect(bullet.rec, { 0, 0, 255, 255 });
+}
+
+AsteroidsScene::AsteroidsScene()
+{
+}
+
+AsteroidsScene::~AsteroidsScene()
+{
+}
+
+void AsteroidsScene::OnEnter()
+{
+	mShip.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mShip.width = mShip.height = 50.0f;
+	mShip.angularSpeed = 200.0f * DEG2RAD;
+	mShip.bulletCooldown.duration = 0.5f;
+}
+
+void AsteroidsScene::OnExit()
+{
+}
+
+void AsteroidsScene::OnUpdate(float dt)
+{
+	if (IsKeyDown(SDL_SCANCODE_A))
+	{
+		mShip.direction = Rotate(mShip.direction, -mShip.angularSpeed * dt);
+	}
+
+	if (IsKeyDown(SDL_SCANCODE_D))
+	{
+		mShip.direction = Rotate(mShip.direction, mShip.angularSpeed * dt);
+	}
+
+	if (IsKeyDown(SDL_SCANCODE_W))
+	{
+		mShip.position = mShip.position + mShip.direction * mShip.speed * dt;
+	}
+
+	if (IsKeyDown(SDL_SCANCODE_S))
+	{
+		mShip.position = mShip.position - mShip.direction * mShip.speed * dt;
+	}
+
+	if (IsKeyDown(SDL_SCANCODE_SPACE))
+	{
+		if (mShip.bulletCooldown.Expired())
+		{
+			mShip.bulletCooldown.Reset();
+
+			Bullet bullet;
+			bullet.width = bullet.height = 10.0f;
+			bullet.position = mShip.position + mShip.direction * sqrtf(powf(mShip.width * 0.5f + bullet.width * 0.5f, 2.0f));
+			bullet.velocity = mShip.direction * 100.0f;
+			bullet.direction = mShip.direction;
+			mBullets.push_back(bullet);
+		}
+	}
+
+	mShip.bulletCooldown.Tick(dt);
+
+	for (Bullet& bullet : mBullets)
+	{
+		bullet.position = bullet.position + bullet.velocity * dt;
+	}
+}
+
+void AsteroidsScene::OnRender()
+{
+	for (const Bullet& bullet : mBullets)
+		bullet.Draw();
+	mShip.Draw();
 }

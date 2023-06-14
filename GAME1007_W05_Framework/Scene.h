@@ -28,6 +28,7 @@ public:
 		LAB_1A,
 		LAB_1B,
 		LAB_2,
+		ASTEROIDS,
 		COUNT
 	};
 
@@ -161,5 +162,79 @@ private:
 
 	std::vector<Turret> mTurrets;
 	std::vector<Enemy> mEnemies;
+	std::vector<Bullet> mBullets;
+};
+
+class AsteroidsScene : public Scene
+{
+public:
+	AsteroidsScene();
+	~AsteroidsScene() final;
+
+	void OnEnter() final;
+	void OnExit() final;
+
+	void OnUpdate(float dt) final;
+	void OnRender() final;
+
+private:
+	struct Timer
+	{
+		float duration = 0.0f;	// max time
+		float elapsed = 0.0f;	// current time
+
+		bool Expired() { return elapsed >= duration; }
+		void Reset() { elapsed = 0.0f; }
+		void Tick(float dt) { elapsed += dt; }
+
+		// Returns value from 0-1 based on completion. Useful for interpolation!
+		float Normalize() { return Clamp(elapsed / duration, 0.0f, 1.0f); }
+	};
+
+	struct Rigidbody
+	{
+		Point position{};
+		Point velocity{};
+		Point acceleration{};
+
+		Point direction{ 1.0f, 0.0f };
+		float angularSpeed = 0.0f;
+	};
+
+	struct Entity : public Rigidbody
+	{
+		float width = 0.0f;
+		float height = 0.0f;
+
+		Rect Collider() const
+		{
+			return { position.x - width * 0.5f, position.y - height * 0.5f, width, height };
+		}
+	};
+
+	struct Bullet : public Entity
+	{
+		// Make this re-usable in the future if viable
+		void Draw() const
+		{
+			DrawRect(Collider(), { 0, 0, 128, 255 });
+			DrawLine(position, position + direction * 20.0f);
+		}
+	};
+
+	struct Ship : public Entity
+	{
+		float speed = 100.0f;
+
+		void Draw() const
+		{
+			DrawRect(Collider(), { 0, 255, 0, 255 });
+			DrawLine(position, position + direction * 100.0f);
+		}
+
+		Timer bulletCooldown;
+
+	} mShip;
+
 	std::vector<Bullet> mBullets;
 };

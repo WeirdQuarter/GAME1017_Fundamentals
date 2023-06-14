@@ -45,5 +45,6 @@ bool IsRunning();
 bool IsKeyDown(SDL_Scancode key);
 bool IsKeyPressed(SDL_Scancode key);
 
+void DrawLine(Point start, Point end);
 void DrawRect(const Rect& rect, const Color& color);
 void DrawTexture(Texture* texture, const Rect& rect, double degrees = 0.0f);

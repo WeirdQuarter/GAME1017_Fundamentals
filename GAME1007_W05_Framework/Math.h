@@ -2,8 +2,28 @@
 #include <SDL.h>
 #include <cmath>
 
+// Constants
+using Rect = SDL_FRect;
+using Point = SDL_FPoint;
+
+#ifndef PI
+#define PI 3.14159265358979323846f
+#endif
+
+#ifndef EPSILON
+#define EPSILON 0.000001f
+#endif
+
+#ifndef DEG2RAD
+#define DEG2RAD (PI/180.0f)
+#endif
+
+#ifndef RAD2DEG
+#define RAD2DEG (180.0f/PI)
+#endif
+
 // Scalar math
-float Clamp(float value, float min, float max)
+inline float Clamp(float value, float min, float max)
 {
 	float result = (value < min) ? min : value;
 
@@ -13,9 +33,6 @@ float Clamp(float value, float min, float max)
 }
 
 // Vector math
-using Rect = SDL_FRect;
-using Point = SDL_FPoint;
-
 inline Point operator+(Point a, Point b)
 {
 	Point result{ a.x + b.x, a.y + b.y };
