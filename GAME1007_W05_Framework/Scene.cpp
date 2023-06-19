@@ -537,4 +537,7 @@ void AsteroidsScene::OnRender()
 	for (const Bullet& bullet : mBullets)
 		bullet.Draw();
 	mShip.Draw();
+
+	Point pos = MousePosition();
+	DrawText("Test", pos.x, pos.y);
 }

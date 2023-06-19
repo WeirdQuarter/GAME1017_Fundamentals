@@ -28,7 +28,9 @@ struct App
 	SDL_Renderer* renderer = nullptr;
 	GuiCallback guiCallback = nullptr;
 	void* guiData = nullptr;
+	Font* defaultFont = nullptr;
 
+	Point mousePosition{};
 	array<Uint8, SDL_NUM_SCANCODES> keyboardCurrent{};
 	array<Uint8, SDL_NUM_SCANCODES> keyboardPrevious{};
 } gApp;
@@ -48,8 +50,10 @@ void AppInit(int width, int height)
 	assert(SDL_Init(SDL_INIT_EVERYTHING) == 0);
 	assert(Mix_OpenAudio(48000, AUDIO_S16SYS, 2, 2048) == 0);
 	assert(IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) == IMG_INIT_PNG | IMG_INIT_JPG);
+	assert(TTF_Init() == 0);
 	gApp.window = SDL_CreateWindow("Fundamentals 2 Framework", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
 	gApp.renderer = SDL_CreateRenderer(gApp.window, -1, 0);
+	gApp.defaultFont = LoadFont("../Assets/fonts/Consolas.ttf");
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -66,12 +70,16 @@ void AppExit()
 	assert(gApp.window != nullptr);
 	assert(gApp.renderer != nullptr);
 
+	UnloadFont(gApp.defaultFont);
+	gApp.defaultFont = nullptr;
+
 	ImGui_ImplSDLRenderer_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
 
 	SDL_DestroyRenderer(gApp.renderer);
 	SDL_DestroyWindow(gApp.window);
+	TTF_Quit();
 	IMG_Quit();
 	Mix_Quit();
 	SDL_Quit();
@@ -92,6 +100,10 @@ void PollEvents()
 			break;
 		}
 	}
+
+	int mx, my;
+	SDL_GetMouseState(&mx, &my);
+	gApp.mousePosition = { (float)mx, (float)my };
 
 	memcpy(gApp.keyboardPrevious.data(), gApp.keyboardCurrent.data(), SDL_NUM_SCANCODES);
 	memcpy(gApp.keyboardCurrent.data(), SDL_GetKeyboardState(nullptr), SDL_NUM_SCANCODES);
@@ -198,6 +210,21 @@ void ResumeMusic()
 	Mix_ResumeMusic();
 }
 
+Font* DefaultFont()
+{
+	return gApp.defaultFont;
+}
+
+Font* LoadFont(const char* path, int size)
+{
+	return TTF_OpenFont(path, size);
+}
+
+void UnloadFont(Font* font)
+{
+	TTF_CloseFont(font);
+}
+
 int GetFps()
 {
 	return gTime.frameCount > gTime.samples.size() ?
@@ -245,6 +272,11 @@ bool IsKeyPressed(SDL_Scancode key)
 	return gApp.keyboardCurrent[key] > gApp.keyboardPrevious[key];
 }
 
+Point MousePosition()
+{
+	return gApp.mousePosition;
+}
+
 void DrawLine(Point start, Point end)
 {
 	SDL_RenderDrawLineF(gApp.renderer, start.x, start.y, end.x, end.y);
@@ -256,7 +288,20 @@ void DrawRect(const Rect& rect, const Color& color)
 	SDL_RenderFillRectF(gApp.renderer, &rect);
 }
 
-void DrawTexture(Texture* texture, const Rect& rect, double degrees)
+void DrawTexture(Texture* texture, const Rect& rect, float degrees)
 {
 	SDL_RenderCopyExF(gApp.renderer, texture, nullptr, &rect, degrees, nullptr, SDL_FLIP_NONE);
+}
+
+void DrawText(const char* text, float x, float y, float degrees, Color color, Font* font)
+{
+	font = font != nullptr ? font : gApp.defaultFont;
+
+	SDL_Surface* surface = TTF_RenderText_Solid(font, text, color);
+	Texture* texture = SDL_CreateTextureFromSurface(gApp.renderer, surface);
+
+	DrawTexture(texture, { x, y, (float)surface->w, (float)surface->h }, degrees);
+
+	SDL_DestroyTexture(texture);
+	SDL_FreeSurface(surface);
 }
