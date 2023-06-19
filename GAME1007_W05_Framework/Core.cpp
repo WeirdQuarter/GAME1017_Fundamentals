@@ -170,6 +170,12 @@ void UnloadTexture(Texture* texture)
 	SDL_DestroyTexture(texture);
 }
 
+void Tint(Texture* texture, Color color)
+{
+	SDL_SetTextureColorMod(texture, color.r, color.g, color.b);
+	SDL_SetTextureAlphaMod(texture, color.a);
+}
+
 Sound* LoadSound(const char* path)
 {
 	return Mix_LoadWAV(path);

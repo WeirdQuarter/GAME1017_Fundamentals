@@ -24,6 +24,9 @@ void RenderEnd();
 Texture* LoadTexture(const char* path);
 void UnloadTexture(Texture* texture);
 
+// Multiply each channel by the value ie dst = src * color
+void Tint(Texture* texture, Color color);
+
 Sound* LoadSound(const char* path);
 void UnloadSound(Sound* sound);
 void PlaySound(Sound* sound, bool loop = false);

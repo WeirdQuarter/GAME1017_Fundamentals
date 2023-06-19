@@ -245,6 +245,8 @@ private:
 
 	} mShip;
 
+	Texture* mTex;
+
 	// TODO:
 	// Container of small asteroids
 	// Container of medium asteroids

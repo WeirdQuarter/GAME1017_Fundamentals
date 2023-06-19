@@ -459,10 +459,13 @@ void Lab2Scene::OnRender()
 
 AsteroidsScene::AsteroidsScene()
 {
+	mTex = LoadTexture("../Assets/img/enterprise.png");
+	Tint(mTex, { 255, 255, 255, 128 });
 }
 
 AsteroidsScene::~AsteroidsScene()
 {
+	UnloadTexture(mTex);
 }
 
 void AsteroidsScene::OnEnter()
@@ -540,4 +543,5 @@ void AsteroidsScene::OnRender()
 
 	Point pos = MousePosition();
 	DrawText("Test", pos.x, pos.y);
+	DrawTexture(mTex, { pos.x, pos.y, 60.0f, 40.0f });
 }
