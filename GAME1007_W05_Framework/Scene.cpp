@@ -459,10 +459,12 @@ void Lab2Scene::OnRender()
 
 AsteroidsScene::AsteroidsScene()
 {
+	mShip.tex = LoadTexture("../Assets/img/enterprise.png");
 }
 
 AsteroidsScene::~AsteroidsScene()
 {
+	UnloadTexture(mShip.tex);
 }
 
 void AsteroidsScene::OnEnter()
@@ -521,6 +523,13 @@ void AsteroidsScene::OnUpdate(float dt)
 		bullet.position = bullet.position + bullet.velocity * dt;
 	}
 
+	static float tt = 0.0f;
+	float r = cosf(tt + PI * 0.00f) * 0.5f + 0.5f;
+	float g = cosf(tt + PI * 0.33f) * 0.5f + 0.5f;
+	float b = cosf(tt + PI * 0.66f) * 0.5f + 0.5f;
+	Tint(mShip.tex, { Uint8(r * 255.0f), Uint8(g * 255.0f), Uint8(b * 255.0f), Uint8((sinf(tt) * 0.5f + 0.5f) * 255.0f) });
+	tt += dt;
+
 	// TODO:
 	// Asteroid spawn - create asteroid if timer expired, then reset timer
 	// Asteroid update - move asteroids based on velocity
@@ -534,31 +543,7 @@ void AsteroidsScene::OnUpdate(float dt)
 
 void AsteroidsScene::OnRender()
 {
-	std::vector<Point> points = { {100.0f, 100.0f},{200.0f, 100.0f},{300.0f, 100.0f} };
-	std::vector<Point> lines = { {100.0f, 200.0f},{200.0f, 200.0f},{300.0f, 200.0f} };
-	std::vector<Rect> rects = { {100.0f, 300.0f, 60.0f, 40.0f},{200.0f, 300.0f, 60.0f, 40.0f},{300.0f, 300.0f, 60.0f, 40.0f} };
 
-	// This can be replaced with DrawRect
-	//for (const Point& point : points)
-	//	DrawPoint(point, { 255, 0, 0, 255 });
-
-	// DrawLines was the only useful function since it did the modulus index math for us
-	for (size_t i = 0; i < lines.size(); i++)
-	{
-		Point start = lines[i];
-		Point end = lines[(i + 1) % lines.size()];
-		DrawLine(start, end, { 0, 255, 0, 255 });
-	}
-
-	for (const Rect& rect : rects)
-		DrawRect(rect, { 255, 0, 255, 255 });
-
-	// I don't see us using multi-point, multi-line, or multi-rect any time soon, so I've removed them to keep Core simple.
-	//DrawPoints(points, { 255, 0, 0, 255 });
-	//DrawLines(lines, { 0, 255, 0, 255 });
-	//DrawRects(rects, { 255, 0, 255, 255 });
-	//DrawPoint(MousePosition(), {255, 0, 0, 255});
-	//DrawLine({ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f }, MousePosition(), {255, 0, 0, 255});
 
 	for (const Bullet& bullet : mBullets)
 		bullet.Draw();

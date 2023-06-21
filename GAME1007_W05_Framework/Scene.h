@@ -240,11 +240,13 @@ private:
 		void Draw() const
 		{
 			Color shipColor = { 0, 255, 0, 255 };
-			DrawRect(Collider(), shipColor);
+			//DrawRect(Collider(), shipColor);
+			DrawTexture(tex, Collider());
 			DrawLine(position, position + direction * 100.0f, shipColor);
 		}
 
 		Timer bulletCooldown;
+		Texture* tex = nullptr;
 
 	} mShip;
 
