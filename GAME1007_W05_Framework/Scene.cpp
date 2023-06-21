@@ -534,7 +534,15 @@ void AsteroidsScene::OnUpdate(float dt)
 
 void AsteroidsScene::OnRender()
 {
-	DrawLine({ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f }, MousePosition(), {255, 0, 0, 255});
+	Points points = { {100.0f, 100.0f},{200.0f, 100.0f},{300.0f, 100.0f} };
+	Points lines = { {100.0f, 200.0f},{200.0f, 200.0f},{300.0f, 300.0f} };
+	Rects rects = { {100.0f, 300.0f, 60.0f, 40.0f},{200.0f, 300.0f, 60.0f, 40.0f},{300.0f, 300.0f, 60.0f, 40.0f} };
+
+	DrawPoints(points, { 255, 0, 0, 255 });
+	DrawLines(lines, { 0, 255, 0, 255 });
+	DrawRects(rects, { 255, 0, 255, 255 });
+	//DrawPoint(MousePosition(), {255, 0, 0, 255});
+	//DrawLine({ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f }, MousePosition(), {255, 0, 0, 255});
 
 	for (const Bullet& bullet : mBullets)
 		bullet.Draw();

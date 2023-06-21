@@ -255,16 +255,40 @@ Point MousePosition()
 	return gApp.mousePosition;
 }
 
+void DrawPoint(const Point& point, const Color& color)
+{
+	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderDrawPointF(gApp.renderer, point.x, point.y);
+}
+
+void DrawPoints(const Points& points, const Color& color)
+{
+	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderDrawPointsF(gApp.renderer, points.data(), points.size());
+}
+
 void DrawLine(const Point& start, const Point& end, const Color& color)
 {
 	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderDrawLineF(gApp.renderer, start.x, start.y, end.x, end.y);
 }
 
+void DrawLines(const Points& points, const Color& color)
+{
+	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderDrawLinesF(gApp.renderer, points.data(), points.size());
+}
+
 void DrawRect(const Rect& rect, const Color& color)
 {
 	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderFillRectF(gApp.renderer, &rect);
+}
+
+void DrawRects(const Rects& rects, const Color& color)
+{
+	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
+	SDL_RenderFillRectsF(gApp.renderer, rects.data(), rects.size());
 }
 
 void DrawTexture(Texture* texture, const Rect& rect, float degrees)
