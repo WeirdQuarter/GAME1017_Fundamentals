@@ -22,6 +22,7 @@ void RenderEnd();
 Texture* LoadTexture(const char* path);
 void UnloadTexture(Texture* texture);
 void Tint(Texture* texture, const Color& color);
+void BlendMode(SDL_BlendMode mode);
 
 Sound* LoadSound(const char* path);
 void UnloadSound(Sound* sound);

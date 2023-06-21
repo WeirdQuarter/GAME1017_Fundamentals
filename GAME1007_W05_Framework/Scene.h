@@ -240,16 +240,17 @@ private:
 
 		void Draw() const
 		{
-			Color shipColor = { 0, 255, 0, 255 };
-			//DrawRect(Collider(), shipColor);
-			DrawTexture(tex, Collider());
-			DrawLine(position, position + direction * 100.0f, shipColor);
+			DrawRect(Collider(), col);
+			//DrawTexture(tex, Collider());
+			DrawLine(position, position + direction * 100.0f, col);
 		}
 
 		Timer bulletCooldown;
 		Texture* tex = nullptr;
 		Color col{};
 	} mShip;
+
+	Color mTestColor{ 255, 255, 255, 255 };
 
 	// TODO:
 	// Container of small asteroids

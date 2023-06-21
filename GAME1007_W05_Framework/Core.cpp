@@ -169,6 +169,11 @@ void Tint(Texture* texture, const Color& color)
 	SDL_SetTextureAlphaMod(texture, color.a);
 }
 
+void BlendMode(SDL_BlendMode mode)
+{
+	SDL_SetRenderDrawBlendMode(gApp.renderer, mode);
+}
+
 Sound* LoadSound(const char* path)
 {
 	return Mix_LoadWAV(path);

@@ -460,11 +460,6 @@ void Lab2Scene::OnRender()
 AsteroidsScene::AsteroidsScene()
 {
 	mShip.tex = LoadTexture("../Assets/img/enterprise.png");
-	Tint(mShip.tex, { 255, 255, 255, 128 });
-	// Here's what happens if we want to turn our ship red:
-	// src colour = white
-	// dst colour = red
-	// {255, 255, 255, 255} * {255, 0, 0, 255} = { 255, 0, 0, 255}
 }
 
 AsteroidsScene::~AsteroidsScene()
@@ -554,7 +549,7 @@ void AsteroidsScene::OnRender()
 	for (const Bullet& bullet : mBullets)
 		bullet.Draw();
 
-	DrawRect({ 0, 0, 200, 200 }, { 0, 255, 0, 255 });
+	DrawRect({ 0, 0, 200, 200 }, mTestColor);
 	mShip.Draw();
 }
 
@@ -562,14 +557,57 @@ void OnAsteroidsGui(void* data)
 {
 	AsteroidsScene& scene = *(AsteroidsScene*)data;
 
-	static float colors[4]{ 0.0f, 1.0f, 0.0f, 1.0f };	// from 0 to 1
-	if (ImGui::ColorPicker4("Colors", colors))
+	static float colors[4]{ 1.0f, 1.0f, 1.0f, 1.0f };	// from 0 to 1
+	if (ImGui::ColorPicker4("Ship Color", colors))
 	{
 		Color color;	// from 0 to 255
 		color.r = colors[0] * 255.0f;
 		color.g = colors[1] * 255.0f;
 		color.b = colors[2] * 255.0f;
 		color.a = colors[3] * 255.0f;
-		Tint(scene.mShip.tex, color);
+		scene.mShip.col = color;
+
+		// Blending must be applied separately to textures in SDL
+		// See SDL_SetTextureBlendMode
+		// If running this on your own, remember that the alpha component must be set manually!
+		//Tint(scene.mShip.tex, color);
+	}
+	
+	static float colors2[4]{ 1.0f, 1.0f, 1.0f, 1.0f };	// from 0 to 1
+	if (ImGui::ColorPicker4("Rect Color", colors2))
+	{
+		Color color;	// from 0 to 255
+		color.r = colors2[0] * 255.0f;
+		color.g = colors2[1] * 255.0f;
+		color.b = colors2[2] * 255.0f;
+		color.a = colors2[3] * 255.0f;
+		scene.mTestColor = color;
+	}
+
+	static int blendMode = 0;
+	if (ImGui::SliderInt("Blend Mode", &blendMode, 0, 4))
+	{
+		switch (blendMode)
+		{
+		case 0:
+			BlendMode(SDL_BLENDMODE_NONE);
+			break;
+
+		case 1:
+			BlendMode(SDL_BLENDMODE_BLEND);
+			break;
+
+		case 2:
+			BlendMode(SDL_BLENDMODE_ADD);
+			break;
+
+		case 3:
+			BlendMode(SDL_BLENDMODE_MOD);
+			break;
+
+		case 4:
+			BlendMode(SDL_BLENDMODE_MUL);
+			break;
+		}
 	}
 }
