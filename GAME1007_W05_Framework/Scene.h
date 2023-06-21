@@ -240,8 +240,8 @@ private:
 
 		void Draw() const
 		{
-			DrawRect(Collider(), col);
-			//DrawTexture(tex, Collider());
+			//DrawRect(Collider(), col);
+			DrawTexture(tex, Collider());
 			DrawLine(position, position + direction * 100.0f, col);
 		}
 
@@ -257,6 +257,14 @@ private:
 	// Container of medium asteroids
 	// Timer to spawn asteroids
 	std::vector<Bullet> mBullets;
+	Timer mAsteroidTimer;
+
+	std::vector<Asteroid> mAsteroidsLarge;
+	std::vector<Asteroid> mAsteroidsMedium;
+	std::vector<Asteroid> mAsteroidsSmall;
+	const float mSizeLarge = 75.0f;
+	const float mSizeMedium = 50.0f;
+	const float mSizeSmall = 25.0f;
 
 	friend void OnAsteroidsGui(void* data);
 };

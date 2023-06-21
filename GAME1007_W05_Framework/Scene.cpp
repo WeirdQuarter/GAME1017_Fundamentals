@@ -470,11 +470,14 @@ AsteroidsScene::~AsteroidsScene()
 void AsteroidsScene::OnEnter()
 {
 	mShip.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
-	mShip.width = mShip.height = 150.0f;
+	mShip.width = mShip.height = 50.0f;
 	mShip.angularSpeed = 200.0f * DEG2RAD;
 	mShip.bulletCooldown.duration = 0.5f;
 
-	SetGuiCallback(OnAsteroidsGui, this);
+	mAsteroidTimer.elapsed = 0.0f;
+	mAsteroidTimer.duration = 2.5f;
+
+	//SetGuiCallback(OnAsteroidsGui, this);
 }
 
 void AsteroidsScene::OnExit()
@@ -518,12 +521,16 @@ void AsteroidsScene::OnUpdate(float dt)
 			mBullets.push_back(bullet);
 		}
 	}
-
 	mShip.bulletCooldown.Tick(dt);
 
 	for (Bullet& bullet : mBullets)
 	{
 		bullet.position = bullet.position + bullet.velocity * dt;
+	}
+
+	for (Asteroid& asteroid : mAsteroidsMedium)
+	{
+		asteroid.position = asteroid.position + asteroid.velocity * dt;
 	}
 
 	//static float tt = 0.0f;
@@ -537,6 +544,33 @@ void AsteroidsScene::OnUpdate(float dt)
 	// Asteroid spawn - create asteroid if timer expired, then reset timer
 	// Asteroid update - move asteroids based on velocity
 	// Asteroid teleport - if x > SCREEN_WIDTH, x = 0 etc
+	if (mAsteroidTimer.Expired())
+	{
+		mAsteroidTimer.Reset();
+
+		Asteroid asteroid;
+		asteroid.width = asteroid.height = mSizeMedium;
+
+		bool collision = true;
+		while (collision)
+		{
+			float x = Random(0.0f, SCREEN_WIDTH - asteroid.width);
+			float y = Random(0.0f, SCREEN_HEIGHT - asteroid.height);
+			asteroid.position = { x, y };
+
+			Rect asteroidRect = asteroid.Collider();
+			Rect shipRect = mShip.Collider();
+			shipRect.w *= 4.0f;
+			shipRect.h *= 4.0f;
+			collision = SDL_HasIntersectionF(&asteroidRect, &shipRect);
+		}
+
+		Point toPlayer = Normalize(mShip.position - asteroid.position);
+		toPlayer = Rotate(toPlayer, Random(-10.0f, 10.0f) * DEG2RAD);
+		asteroid.velocity = toPlayer * Random(20.0f, 200.0f);
+		mAsteroidsMedium.push_back(asteroid);
+	}
+	mAsteroidTimer.Tick(dt);
 
 	// TODO:
 	// Bullet collision - remove if off screen or hitting asteroid
@@ -549,7 +583,10 @@ void AsteroidsScene::OnRender()
 	for (const Bullet& bullet : mBullets)
 		bullet.Draw();
 
-	DrawRect({ 0, 0, 200, 200 }, mTestColor);
+	for (const Asteroid& asteroid : mAsteroidsMedium)
+		asteroid.Draw();
+
+	//DrawRect({ 0, 0, 200, 200 }, mTestColor);
 	mShip.Draw();
 }
 
