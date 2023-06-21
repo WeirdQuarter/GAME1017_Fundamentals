@@ -531,6 +531,7 @@ void AsteroidsScene::OnUpdate(float dt)
 	for (Asteroid& asteroid : mAsteroidsMedium)
 	{
 		asteroid.position = asteroid.position + asteroid.velocity * dt;
+		Wrap(asteroid);
 	}
 
 	//static float tt = 0.0f;
@@ -540,10 +541,7 @@ void AsteroidsScene::OnUpdate(float dt)
 	//Tint(mShip.tex, { Uint8(r * 255.0f), Uint8(g * 255.0f), Uint8(b * 255.0f), Uint8((sinf(tt) * 0.5f + 0.5f) * 255.0f) });
 	//tt += dt;
 
-	// TODO:
-	// Asteroid spawn - create asteroid if timer expired, then reset timer
-	// Asteroid update - move asteroids based on velocity
-	// Asteroid teleport - if x > SCREEN_WIDTH, x = 0 etc
+	// Asteroid spawning -- spawn based on time
 	if (mAsteroidTimer.Expired())
 	{
 		mAsteroidTimer.Reset();
@@ -551,6 +549,7 @@ void AsteroidsScene::OnUpdate(float dt)
 		Asteroid asteroid;
 		asteroid.width = asteroid.height = mSizeMedium;
 
+		// Ensure asteroid isn't spawned on top of player
 		bool collision = true;
 		while (collision)
 		{
@@ -565,6 +564,7 @@ void AsteroidsScene::OnUpdate(float dt)
 			collision = SDL_HasIntersectionF(&asteroidRect, &shipRect);
 		}
 
+		// Add some variance to asteroid movement by shooting them +- 10 degrees towards the player
 		Point toPlayer = Normalize(mShip.position - asteroid.position);
 		toPlayer = Rotate(toPlayer, Random(-10.0f, 10.0f) * DEG2RAD);
 		asteroid.velocity = toPlayer * Random(20.0f, 200.0f);
@@ -588,6 +588,15 @@ void AsteroidsScene::OnRender()
 
 	//DrawRect({ 0, 0, 200, 200 }, mTestColor);
 	mShip.Draw();
+}
+
+void AsteroidsScene::Wrap(Entity& entity)
+{
+	// Consider offsetting position by half width & half height since position is the centre of an entity
+	if (entity.position.x <= 0.0f) entity.position.x = SCREEN_WIDTH;
+	else if (entity.position.x >= SCREEN_WIDTH) entity.position.x = 0.0f;
+	else if (entity.position.y <= 0.0f) entity.position.y = SCREEN_HEIGHT;
+	else if (entity.position.y >= SCREEN_HEIGHT) entity.position.y = 0.0f;
 }
 
 void OnAsteroidsGui(void* data)

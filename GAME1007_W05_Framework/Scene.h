@@ -4,6 +4,7 @@
 #include <vector>
 constexpr int SCREEN_WIDTH = 1024;
 constexpr int SCREEN_HEIGHT = 768;
+constexpr Rect SCREEN = { 0.0f, 0.0f, (float)SCREEN_WIDTH, (float)SCREEN_HEIGHT };
 
 void OnTitleGui(void* data);
 void OnGameGui(void* data);
@@ -267,4 +268,6 @@ private:
 	const float mSizeSmall = 25.0f;
 
 	friend void OnAsteroidsGui(void* data);
+
+	void Wrap(Entity& entity);
 };
