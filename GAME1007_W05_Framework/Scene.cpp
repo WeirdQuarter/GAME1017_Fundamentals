@@ -526,9 +526,60 @@ void AsteroidsScene::OnUpdate(float dt)
 	for (Bullet& bullet : mBullets)
 	{
 		bullet.position = bullet.position + bullet.velocity * dt;
+		Rect bulletRect = bullet.Collider();
+
+		// TODO -- spawn 2 medium asteroids if a bullet hits a large asteroid
+		for (Asteroid& asteroid : mAsteroidsLarge)
+		{
+
+		}
+
+		// Spawn 2 small asteroids if a bullet hits a medium asteroid
+		for (Asteroid& asteroid : mAsteroidsMedium)
+		{
+			Rect asteroidRect = asteroid.Collider();
+			if (SDL_HasIntersectionF(&bulletRect, &asteroidRect))
+			{
+				asteroid.health -= bullet.damage;
+
+				Asteroid asteroid1, asteroid2;
+				asteroid1.position = asteroid2.position = asteroid.position;
+				asteroid1.width = asteroid2.width = mSizeSmall;
+				asteroid1.height = asteroid2.height = mSizeSmall;
+
+				float r = Random(30.0f, 45.0f) * DEG2RAD;
+				float v = Random(20.0f, 200.0f);
+				Point direction = Normalize(bullet.velocity);
+				Point direction1 = Rotate(direction,  r);
+				Point direction2 = Rotate(direction, -r);
+				asteroid1.velocity = direction1 * v;
+				asteroid2.velocity = direction2 * v;
+
+				// TODO -- take bullet collider and velocity into account when spawning asteroids
+				asteroid1.position = asteroid1.position + direction1 * mSizeMedium;
+				asteroid2.position = asteroid2.position + direction2 * mSizeMedium;
+
+				mAsteroidsSmall.push_back(asteroid1);
+				mAsteroidsSmall.push_back(asteroid2);
+			}
+		}
+	}
+
+	// TODO -- update and wrap large asteroids. Consider making a physics update function like in AI
+
+	for (Asteroid& asteroid : mAsteroidsLarge)
+	{
+		asteroid.position = asteroid.position + asteroid.velocity * dt;
+		Wrap(asteroid);
 	}
 
 	for (Asteroid& asteroid : mAsteroidsMedium)
+	{
+		asteroid.position = asteroid.position + asteroid.velocity * dt;
+		Wrap(asteroid);
+	}
+
+	for (Asteroid& asteroid : mAsteroidsSmall)
 	{
 		asteroid.position = asteroid.position + asteroid.velocity * dt;
 		Wrap(asteroid);
@@ -545,30 +596,7 @@ void AsteroidsScene::OnUpdate(float dt)
 	if (mAsteroidTimer.Expired())
 	{
 		mAsteroidTimer.Reset();
-
-		Asteroid asteroid;
-		asteroid.width = asteroid.height = mSizeMedium;
-
-		// Ensure asteroid isn't spawned on top of player
-		bool collision = true;
-		while (collision)
-		{
-			float x = Random(0.0f, SCREEN_WIDTH - asteroid.width);
-			float y = Random(0.0f, SCREEN_HEIGHT - asteroid.height);
-			asteroid.position = { x, y };
-
-			Rect asteroidRect = asteroid.Collider();
-			Rect shipRect = mShip.Collider();
-			shipRect.w *= 4.0f;
-			shipRect.h *= 4.0f;
-			collision = SDL_HasIntersectionF(&asteroidRect, &shipRect);
-		}
-
-		// Add some variance to asteroid movement by shooting them +- 10 degrees towards the player
-		Point toPlayer = Normalize(mShip.position - asteroid.position);
-		toPlayer = Rotate(toPlayer, Random(-10.0f, 10.0f) * DEG2RAD);
-		asteroid.velocity = toPlayer * Random(20.0f, 200.0f);
-		mAsteroidsMedium.push_back(asteroid);
+		mAsteroidsMedium.push_back(SpawnAsteroid(mSizeMedium));
 	}
 	mAsteroidTimer.Tick(dt);
 
@@ -576,15 +604,75 @@ void AsteroidsScene::OnUpdate(float dt)
 	// Bullet collision - remove if off screen or hitting asteroid
 	// Handle small vs medium asteroids accordingly
 	// Hint: small.direction = Rotate(medium.direction, Random(30.0f, 45.0f) * DEG2RAD * dt);
+	mBullets.erase(remove_if(mBullets.begin(), mBullets.end(), [this](Bullet& bullet)
+	{
+			// Test if bullet is off-screen first because that's cheaper than testing it against every asteroid
+			Rect bulletRect = bullet.Collider();
+			if (!SDL_HasIntersectionF(&bulletRect, &SCREEN)) return true;
+
+			// Make this a function if you'd like to remove the duplication in these 3 loops
+			for (Asteroid& asteroid : mAsteroidsLarge)
+			{
+				Rect asteroidRect = asteroid.Collider();
+				if (SDL_HasIntersectionF(&asteroidRect, &bulletRect))
+				{
+					asteroid.health -= bullet.damage;
+					return true;
+				}
+			}
+
+			for (Asteroid& asteroid : mAsteroidsMedium)
+			{
+				Rect asteroidRect = asteroid.Collider();
+				if (SDL_HasIntersectionF(&asteroidRect, &bulletRect))
+				{
+					asteroid.health -= bullet.damage;
+					return true;
+				}
+			}
+
+			for (Asteroid& asteroid : mAsteroidsSmall)
+			{
+				Rect asteroidRect = asteroid.Collider();
+				if (SDL_HasIntersectionF(&asteroidRect, &bulletRect))
+				{
+					asteroid.health -= bullet.damage;
+					return true;
+				}
+			}
+
+			return false;
+	}), mBullets.end());
+
+	mAsteroidsLarge.erase(remove_if(mAsteroidsLarge.begin(), mAsteroidsLarge.end(), [this](const Asteroid& asteroid)
+	{
+		return asteroid.health <= 0.0f;
+	}), mAsteroidsLarge.end());
+
+	mAsteroidsMedium.erase(remove_if(mAsteroidsMedium.begin(), mAsteroidsMedium.end(), [this](const Asteroid& asteroid)
+	{
+		return asteroid.health <= 0.0f;
+	}), mAsteroidsMedium.end());
+
+	mAsteroidsSmall.erase(remove_if(mAsteroidsSmall.begin(), mAsteroidsSmall.end(), [this](const Asteroid& asteroid)
+	{
+		return asteroid.health <= 0.0f;
+	}), mAsteroidsSmall.end());
 }
 
 void AsteroidsScene::OnRender()
 {
-	for (const Bullet& bullet : mBullets)
-		bullet.Draw();
+	for (const Asteroid& asteroid : mAsteroidsLarge)
+		asteroid.Draw();
 
 	for (const Asteroid& asteroid : mAsteroidsMedium)
 		asteroid.Draw();
+
+	for (const Asteroid& asteroid : mAsteroidsSmall)
+		asteroid.Draw();
+
+	for (const Bullet& bullet : mBullets)
+		bullet.Draw();
 
 	//DrawRect({ 0, 0, 200, 200 }, mTestColor);
 	mShip.Draw();
@@ -597,6 +685,34 @@ void AsteroidsScene::Wrap(Entity& entity)
 	else if (entity.position.x >= SCREEN_WIDTH) entity.position.x = 0.0f;
 	else if (entity.position.y <= 0.0f) entity.position.y = SCREEN_HEIGHT;
 	else if (entity.position.y >= SCREEN_HEIGHT) entity.position.y = 0.0f;
+}
+
+AsteroidsScene::Asteroid AsteroidsScene::SpawnAsteroid(float size)
+{
+	Asteroid asteroid;
+	asteroid.width = asteroid.height = size;
+
+	// Ensure asteroid isn't spawned on top of player
+	bool collision = true;
+	while (collision)
+	{
+		float x = Random(0.0f, SCREEN_WIDTH - asteroid.width);
+		float y = Random(0.0f, SCREEN_HEIGHT - asteroid.height);
+		asteroid.position = { x, y };
+
+		Rect asteroidRect = asteroid.Collider();
+		Rect shipRect = mShip.Collider();
+		shipRect.w *= 4.0f;
+		shipRect.h *= 4.0f;
+		collision = SDL_HasIntersectionF(&asteroidRect, &shipRect);
+	}
+
+	// Add some variance to asteroid movement by shooting them +- 10 degrees towards the player
+	Point toPlayer = Normalize(mShip.position - asteroid.position);
+	toPlayer = Rotate(toPlayer, Random(-10.0f, 10.0f) * DEG2RAD);
+	asteroid.velocity = toPlayer * Random(20.0f, 200.0f);
+
+	return asteroid;
 }
 
 void OnAsteroidsGui(void* data)

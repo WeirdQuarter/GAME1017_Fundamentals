@@ -216,6 +216,7 @@ private:
 
 	struct Bullet : public Entity
 	{
+		float damage = 100.0f;
 		void Draw() const
 		{
 			Color bulletColor = { 255, 0, 0, 255 };
@@ -227,6 +228,7 @@ private:
 	// Add on to this class if necessary
 	struct Asteroid : public Entity
 	{
+		float health = 100.0f;
 		void Draw() const
 		{
 			Color asteroidColor = { 255, 0, 255, 255 };
@@ -269,5 +271,6 @@ private:
 
 	friend void OnAsteroidsGui(void* data);
 
+	Asteroid SpawnAsteroid(float size);
 	void Wrap(Entity& entity);
 };
