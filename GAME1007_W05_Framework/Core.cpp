@@ -29,6 +29,7 @@ struct App
 	GuiCallback guiCallback = nullptr;
 	void* guiData = nullptr;
 
+	Point mousePosition{};
 	array<Uint8, SDL_NUM_SCANCODES> keyboardCurrent{};
 	array<Uint8, SDL_NUM_SCANCODES> keyboardPrevious{};
 } gApp;
@@ -92,6 +93,10 @@ void PollEvents()
 			break;
 		}
 	}
+
+	int mx, my;
+	SDL_GetMouseState(&mx, &my);
+	gApp.mousePosition = { (float)mx, (float)my };
 
 	memcpy(gApp.keyboardPrevious.data(), gApp.keyboardCurrent.data(), SDL_NUM_SCANCODES);
 	memcpy(gApp.keyboardCurrent.data(), SDL_GetKeyboardState(nullptr), SDL_NUM_SCANCODES);
@@ -245,6 +250,11 @@ bool IsKeyPressed(SDL_Scancode key)
 	return gApp.keyboardCurrent[key] > gApp.keyboardPrevious[key];
 }
 
+Point MousePosition()
+{
+	return gApp.mousePosition;
+}
+
 void DrawLine(const Point& start, const Point& end, const Color& color)
 {
 	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
@@ -257,7 +267,7 @@ void DrawRect(const Rect& rect, const Color& color)
 	SDL_RenderFillRectF(gApp.renderer, &rect);
 }
 
-void DrawTexture(Texture* texture, const Rect& rect, double degrees)
+void DrawTexture(Texture* texture, const Rect& rect, float degrees)
 {
 	SDL_RenderCopyExF(gApp.renderer, texture, nullptr, &rect, degrees, nullptr, SDL_FLIP_NONE);
 }
