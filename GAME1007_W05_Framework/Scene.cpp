@@ -460,6 +460,11 @@ void Lab2Scene::OnRender()
 AsteroidsScene::AsteroidsScene()
 {
 	mShip.tex = LoadTexture("../Assets/img/enterprise.png");
+	Tint(mShip.tex, { 255, 255, 255, 128 });
+	// Here's what happens if we want to turn our ship red:
+	// src colour = white
+	// dst colour = red
+	// {255, 255, 255, 255} * {255, 0, 0, 255} = { 255, 0, 0, 255}
 }
 
 AsteroidsScene::~AsteroidsScene()
@@ -470,13 +475,16 @@ AsteroidsScene::~AsteroidsScene()
 void AsteroidsScene::OnEnter()
 {
 	mShip.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
-	mShip.width = mShip.height = 50.0f;
+	mShip.width = mShip.height = 150.0f;
 	mShip.angularSpeed = 200.0f * DEG2RAD;
 	mShip.bulletCooldown.duration = 0.5f;
+
+	SetGuiCallback(OnAsteroidsGui, this);
 }
 
 void AsteroidsScene::OnExit()
 {
+	SetGuiCallback(nullptr, nullptr);
 }
 
 void AsteroidsScene::OnUpdate(float dt)
@@ -523,12 +531,12 @@ void AsteroidsScene::OnUpdate(float dt)
 		bullet.position = bullet.position + bullet.velocity * dt;
 	}
 
-	static float tt = 0.0f;
-	float r = cosf(tt + PI * 0.00f) * 0.5f + 0.5f;
-	float g = cosf(tt + PI * 0.33f) * 0.5f + 0.5f;
-	float b = cosf(tt + PI * 0.66f) * 0.5f + 0.5f;
-	Tint(mShip.tex, { Uint8(r * 255.0f), Uint8(g * 255.0f), Uint8(b * 255.0f), Uint8((sinf(tt) * 0.5f + 0.5f) * 255.0f) });
-	tt += dt;
+	//static float tt = 0.0f;
+	//float r = cosf(tt + PI * 0.00f) * 0.5f + 0.5f;
+	//float g = cosf(tt + PI * 0.33f) * 0.5f + 0.5f;
+	//float b = cosf(tt + PI * 0.66f) * 0.5f + 0.5f;
+	//Tint(mShip.tex, { Uint8(r * 255.0f), Uint8(g * 255.0f), Uint8(b * 255.0f), Uint8((sinf(tt) * 0.5f + 0.5f) * 255.0f) });
+	//tt += dt;
 
 	// TODO:
 	// Asteroid spawn - create asteroid if timer expired, then reset timer
@@ -543,9 +551,25 @@ void AsteroidsScene::OnUpdate(float dt)
 
 void AsteroidsScene::OnRender()
 {
-
-
 	for (const Bullet& bullet : mBullets)
 		bullet.Draw();
+
+	DrawRect({ 0, 0, 200, 200 }, { 0, 255, 0, 255 });
 	mShip.Draw();
+}
+
+void OnAsteroidsGui(void* data)
+{
+	AsteroidsScene& scene = *(AsteroidsScene*)data;
+
+	static float colors[4]{ 0.0f, 1.0f, 0.0f, 1.0f };	// from 0 to 1
+	if (ImGui::ColorPicker4("Colors", colors))
+	{
+		Color color;	// from 0 to 255
+		color.r = colors[0] * 255.0f;
+		color.g = colors[1] * 255.0f;
+		color.b = colors[2] * 255.0f;
+		color.a = colors[3] * 255.0f;
+		Tint(scene.mShip.tex, color);
+	}
 }

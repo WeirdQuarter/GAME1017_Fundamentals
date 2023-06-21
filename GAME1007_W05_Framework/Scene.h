@@ -8,6 +8,7 @@ constexpr int SCREEN_HEIGHT = 768;
 void OnTitleGui(void* data);
 void OnGameGui(void* data);
 void OnLab1BGui(void* data);
+void OnAsteroidsGui(void* data);
 
 class Scene
 {
@@ -247,7 +248,7 @@ private:
 
 		Timer bulletCooldown;
 		Texture* tex = nullptr;
-
+		Color col{};
 	} mShip;
 
 	// TODO:
@@ -255,4 +256,6 @@ private:
 	// Container of medium asteroids
 	// Timer to spawn asteroids
 	std::vector<Bullet> mBullets;
+
+	friend void OnAsteroidsGui(void* data);
 };
