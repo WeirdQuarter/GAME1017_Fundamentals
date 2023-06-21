@@ -245,8 +245,9 @@ bool IsKeyPressed(SDL_Scancode key)
 	return gApp.keyboardCurrent[key] > gApp.keyboardPrevious[key];
 }
 
-void DrawLine(Point start, Point end)
+void DrawLine(const Point& start, const Point& end, const Color& color)
 {
+	SDL_SetRenderDrawColor(gApp.renderer, color.r, color.g, color.b, color.a);
 	SDL_RenderDrawLineF(gApp.renderer, start.x, start.y, end.x, end.y);
 }
 

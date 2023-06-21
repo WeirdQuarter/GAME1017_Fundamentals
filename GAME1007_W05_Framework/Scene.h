@@ -216,8 +216,9 @@ private:
 	{
 		void Draw() const
 		{
-			DrawRect(Collider(), { 255, 0, 0, 255 });
-			DrawLine(position, position + direction * 20.0f);
+			Color bulletColor = { 255, 0, 0, 255 };
+			DrawRect(Collider(), bulletColor);
+			DrawLine(position, position + direction * 20.0f, bulletColor);
 		}
 	};
 
@@ -226,8 +227,9 @@ private:
 	{
 		void Draw() const
 		{
-			DrawRect(Collider(), { 255, 0, 255, 255 });
-			DrawLine(position, position + direction * 20.0f);
+			Color asteroidColor = { 255, 0, 255, 255 };
+			DrawRect(Collider(), asteroidColor);
+			DrawLine(position, position + direction * 20.0f, asteroidColor);
 		}
 	};
 
@@ -237,8 +239,9 @@ private:
 
 		void Draw() const
 		{
-			DrawRect(Collider(), { 0, 255, 0, 255 });
-			DrawLine(position, position + direction * 100.0f);
+			Color shipColor = { 0, 255, 0, 255 };
+			DrawRect(Collider(), shipColor);
+			DrawLine(position, position + direction * 100.0f, shipColor);
 		}
 
 		Timer bulletCooldown;
