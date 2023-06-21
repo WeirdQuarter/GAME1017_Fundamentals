@@ -2,28 +2,14 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
-#include <vector>
 #include "imgui/imgui.h"
 #include "Math.h"
 
-using Points = std::vector<Point>;
-using Rects = std::vector<Rect>;
-
 using Texture = SDL_Texture;
-using Textures = std::vector<Texture>;
-
 using Color = SDL_Color;
-using Colors = std::vector<Color>;
-
 using Sound = Mix_Chunk;
-using Sounds = std::vector<Sound>;
-
 using Music = Mix_Music;
-using Musics = std::vector<Music>;
-
-// This is just driving home the point of "using". We have no need for a vector of gui callbacks currently...
 using GuiCallback = void(*)(void*);
-using GuiCallbacks = std::vector<GuiCallback>;
 
 void SetGuiCallback(GuiCallback callback, void* data);
 
@@ -60,13 +46,6 @@ bool IsKeyDown(SDL_Scancode key);
 bool IsKeyPressed(SDL_Scancode key);
 Point MousePosition();
 
-void DrawPoint(const Point& point, const Color& color);
-void DrawPoints(const Points& points, const Color& color);
-
 void DrawLine(const Point& start, const Point& end, const Color& color);
-void DrawLines(const Points& points, const Color& color);
-
 void DrawRect(const Rect& rect, const Color& color);
-void DrawRects(const Rects& rects, const Color& color);
-
 void DrawTexture(Texture* texture, const Rect& rect, float degrees = 0.0f);
