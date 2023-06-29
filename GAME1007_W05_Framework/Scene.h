@@ -240,6 +240,7 @@ private:
 	struct Ship : public Entity
 	{
 		float speed = 100.0f;
+		float rotation = 0;
 
 		void Draw() const
 		{
@@ -250,7 +251,7 @@ private:
 
 		Timer bulletCooldown;
 		Texture* tex = nullptr;
-		Color col{};
+		Color col{ 255, 255, 255, 255 };
 	} mShip;
 
 	Color mTestColor{ 255, 255, 255, 255 };

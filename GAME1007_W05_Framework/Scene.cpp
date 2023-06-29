@@ -473,6 +473,7 @@ void AsteroidsScene::OnEnter()
 	mShip.width = mShip.height = 50.0f;
 	mShip.angularSpeed = 200.0f * DEG2RAD;
 	mShip.bulletCooldown.duration = 0.5f;
+	mShip.velocity = { 0,0 };
 
 	mAsteroidTimer.elapsed = 0.0f;
 	mAsteroidTimer.duration = 2.5f;
@@ -487,6 +488,9 @@ void AsteroidsScene::OnExit()
 
 void AsteroidsScene::OnUpdate(float dt)
 {
+	mShip.velocity.x = mShip.direction.x * mShip.speed;
+	mShip.velocity.y = mShip.direction.y * mShip.speed;
+
 	if (IsKeyDown(SDL_SCANCODE_A))
 	{
 		mShip.direction = Rotate(mShip.direction, -mShip.angularSpeed * dt);
@@ -498,13 +502,36 @@ void AsteroidsScene::OnUpdate(float dt)
 	}
 
 	if (IsKeyDown(SDL_SCANCODE_W))
+	{	
+		if (mShip.acceleration.x < 1)
+		{
+			mShip.acceleration.x += 0.01f;
+		}
+		//mShip.position = mShip.position + mShip.direction * mShip.speed * dt;
+	}
+	else
 	{
-		mShip.position = mShip.position + mShip.direction * mShip.speed * dt;
+		if (mShip.acceleration.x > 0)
+		{
+			mShip.acceleration.x -= 0.005f;
+		}
+		else if (mShip.acceleration.x < 0)
+		{
+			mShip.acceleration.x = 0;
+		}
 	}
 
 	if (IsKeyDown(SDL_SCANCODE_S))
-	{
-		mShip.position = mShip.position - mShip.direction * mShip.speed * dt;
+	{	
+		if (mShip.acceleration.x > 0)
+		{
+			mShip.acceleration.x -= 0.04f;
+		}
+		else if (mShip.acceleration.x < 0)
+		{
+			mShip.acceleration.x = 0;
+		}
+		//mShip.position = mShip.position - mShip.direction * mShip.speed * dt;
 	}
 
 	if (IsKeyDown(SDL_SCANCODE_SPACE))
@@ -522,6 +549,8 @@ void AsteroidsScene::OnUpdate(float dt)
 		}
 	}
 	mShip.bulletCooldown.Tick(dt);
+	mShip.position.x += (mShip.velocity.x * mShip.acceleration.x);
+	mShip.position.y += (mShip.velocity.y * mShip.acceleration.x);
 
 	for (Bullet& bullet : mBullets)
 	{
