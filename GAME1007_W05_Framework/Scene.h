@@ -255,6 +255,7 @@ private:
 		float health = 100.0f;
 		float damageCooldown = 200.0f;
 		float knockbackCooldown = 200.0f;
+		float collsionDelay = 0.0f;
 
 		void Draw() const
 		{
@@ -264,7 +265,7 @@ private:
 		}
 		Texture* tex = nullptr;
 		Timer bulletCooldown;
-		Color col{ 255, 0, 0, 255 };
+		Color col{ 255, 0, 0, 0 };
 	} mShip;
 
 	Color mTestColor{ 255, 255, 255, 255 };

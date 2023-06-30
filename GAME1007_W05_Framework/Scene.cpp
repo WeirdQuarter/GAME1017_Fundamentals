@@ -509,6 +509,10 @@ void AsteroidsScene::OnUpdate(float dt)
 	{
 		mShip.knockbackCooldown = mShip.knockbackCooldown - 1;
 	}
+	if (mShip.collsionDelay > 0)
+	{
+		mShip.collsionDelay = mShip.collsionDelay - 1;
+	}
 	
 	if (IsKeyDown(SDL_SCANCODE_A))
 	{
@@ -578,9 +582,14 @@ void AsteroidsScene::OnUpdate(float dt)
 		//decrease volume
 	}
 	mShip.bulletCooldown.Tick(dt);
-	mShip.position.x += (mShip.velocity.x * mShip.acceleration.x);
-	mShip.position.y += (mShip.velocity.y * mShip.acceleration.x);
 
+	if (mShip.collsionDelay <= 0)
+	{
+		mShip.position.x += (mShip.velocity.x * mShip.acceleration.x);
+		mShip.position.y += (mShip.velocity.y * mShip.acceleration.x);
+	}
+	
+	
 	//Asteriod Collision
 	for (Asteroid& asteroid : mAsteroidsLarge)
 	{
@@ -588,6 +597,13 @@ void AsteroidsScene::OnUpdate(float dt)
 		Rect shipRect = mShip.Collider();
 		if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
 		{
+			if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
+			{
+				mShip.velocity.x = 0;
+				mShip.velocity.y = 0;
+				mShip.acceleration.x = 0;
+				mShip.collsionDelay = 10.0f;
+			}
 			if (mShip.damageCooldown <= 0)
 			{
 				//damage
@@ -621,6 +637,14 @@ void AsteroidsScene::OnUpdate(float dt)
 		Rect shipRect = mShip.Collider();
 		if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
 		{
+			if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
+			{
+				mShip.velocity.x = 0;
+				mShip.velocity.y = 0;
+				mShip.acceleration.x = 0;
+				mShip.collsionDelay = 10.0f;
+
+			}
 			if (mShip.damageCooldown <= 0)
 			{
 				//damage
@@ -654,6 +678,14 @@ void AsteroidsScene::OnUpdate(float dt)
 		Rect shipRect = mShip.Collider();
 		if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
 		{
+			if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
+			{
+				mShip.velocity.x = 0;
+				mShip.velocity.y = 0;
+				mShip.acceleration.x = 0;
+				mShip.collsionDelay = 10.0f;
+
+			}
 			if (mShip.damageCooldown <= 0)
 			{
 				//damage
