@@ -181,6 +181,9 @@ public:
 	void OnRender() final;
 
 private:
+	Sound* sfxPlayerShoot = nullptr;
+	Sound* sfxShipHit = nullptr;
+	Music* bgmDefault = nullptr;
 	struct Timer
 	{
 		float duration = 0.0f;	// max time
@@ -200,6 +203,7 @@ private:
 		Point velocity{};
 		Point acceleration{};
 
+		Point baseVelocity{ 1.0f, 1.0f };
 		Point direction{ 1.0f, 0.0f };
 		float angularSpeed = 0.0f;
 	};
@@ -233,7 +237,7 @@ private:
 	{
 		float health = 100.0f;
 		float damage = 10.0f;
-		
+
 		
 		void Draw() const
 		{
@@ -249,7 +253,8 @@ private:
 	{
 		float speed = 100.0f;
 		float health = 100.0f;
-		float damageCooldown = 5.0f;
+		float damageCooldown = 200.0f;
+		float knockbackCooldown = 200.0f;
 
 		void Draw() const
 		{
@@ -259,7 +264,7 @@ private:
 		}
 		Texture* tex = nullptr;
 		Timer bulletCooldown;
-		Color col{ 255, 255, 255, 255 };
+		Color col{ 255, 0, 0, 255 };
 	} mShip;
 
 	Color mTestColor{ 255, 255, 255, 255 };

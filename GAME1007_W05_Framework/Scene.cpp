@@ -460,12 +460,22 @@ void Lab2Scene::OnRender()
 AsteroidsScene::AsteroidsScene()
 {
 	mShip.tex = LoadTexture("../Assets/img/enterprise.png");
-	
+	sfxPlayerShoot = LoadSound("../Assets/aud/Fire.wav");
+	bgmDefault = LoadMusic("../Assets/aud/bgm.mp3");
+	sfxShipHit = LoadSound("../Assets/aud/Explode.wav");
+	if (bgmDefault == NULL)
+	{
+		std::cout << "Mix_LoadMUS failed to load file: " << SDL_GetError() << std::endl;
+	}
+	PlayMusic(bgmDefault, 1);
 }
 
 AsteroidsScene::~AsteroidsScene()
 {
 	UnloadTexture(mShip.tex);
+	UnloadMusic(bgmDefault);
+	UnloadSound(sfxPlayerShoot);
+	UnloadSound(sfxShipHit);
 }
 
 void AsteroidsScene::OnEnter()
@@ -495,7 +505,11 @@ void AsteroidsScene::OnUpdate(float dt)
 	{
 		mShip.damageCooldown = mShip.damageCooldown - 1;
 	}
-
+	if (mShip.knockbackCooldown > 0)
+	{
+		mShip.knockbackCooldown = mShip.knockbackCooldown - 1;
+	}
+	
 	if (IsKeyDown(SDL_SCANCODE_A))
 	{
 		mShip.direction = Rotate(mShip.direction, -mShip.angularSpeed * dt);
@@ -551,32 +565,127 @@ void AsteroidsScene::OnUpdate(float dt)
 			bullet.velocity = mShip.direction * 500.0f;
 			bullet.direction = mShip.direction;
 			mBullets.push_back(bullet);
+
+			PlaySound(sfxPlayerShoot, 0);
 		}
+	}
+	if(IsKeyDown(SDL_SCANCODE_EQUALS))
+	{
+		//increase volume
+	}
+	if(IsKeyDown(SDL_SCANCODE_MINUS))
+	{
+		//decrease volume
 	}
 	mShip.bulletCooldown.Tick(dt);
 	mShip.position.x += (mShip.velocity.x * mShip.acceleration.x);
 	mShip.position.y += (mShip.velocity.y * mShip.acceleration.x);
+
+	//Asteriod Collision
 	for (Asteroid& asteroid : mAsteroidsLarge)
 	{
 		Rect asteroidRect = asteroid.Collider();
 		Rect shipRect = mShip.Collider();
-		if (SDL_HasIntersectionF(&shipRect, &asteroidRect) && mShip.damageCooldown <= 0)
+		if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
 		{
-			//damage
-			mShip.damageCooldown = 5.0f;
-			mShip.health = mShip.health - asteroid.damage;
+			if (mShip.damageCooldown <= 0)
+			{
+				//damage
+				mShip.damageCooldown = 5.0f;
+				mShip.health = mShip.health - asteroid.damage;
+				//sound
+				PlaySound(sfxShipHit, 0);
+			}
+
 			//knockback
-			float r = Random(30.0f, 45.0f) * DEG2RAD;
-			float v = Random(20.0f, 200.0f);
-			Point direction = Normalize(mShip.velocity);
-			Point direction1 = Rotate(direction, r);
-			asteroid.velocity = direction1 * v;
+			if (mShip.knockbackCooldown <= 0)
+			{
+				float r = 180.0f * DEG2RAD;
+				float v = Random(100.0f, 200.0f);
+				Point direction = Normalize(asteroid.velocity);
+				Point direction1 = Rotate(direction, r);
+				asteroid.velocity = direction1 * v;
+			}
+			//tint
+			if (mShip.damageCooldown <= 0)
+			{
+				Tint(mShip.tex, mShip.col);
+			}
+			mShip.knockbackCooldown = 60.0f;
+			mShip.damageCooldown = 60.0f;
 		}
 	}
-	if (mShip.health <= 0)
+	for (Asteroid& asteroid : mAsteroidsMedium)
 	{
-		mShip.tex = LoadTexture("../Assets/img/explosion.png");
+		Rect asteroidRect = asteroid.Collider();
+		Rect shipRect = mShip.Collider();
+		if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
+		{
+			if (mShip.damageCooldown <= 0)
+			{
+				//damage
+				mShip.damageCooldown = 5.0f;
+				mShip.health = mShip.health - asteroid.damage;
+				//sound
+				PlaySound(sfxShipHit, 0);
+			}
+
+			//knockback
+			if (mShip.knockbackCooldown <= 0)
+			{
+				float r = 180.0f * DEG2RAD;
+				float v = Random(100.0f, 200.0f);
+				Point direction = Normalize(asteroid.velocity);
+				Point direction1 = Rotate(direction, r);
+				asteroid.velocity = direction1 * v;
+			}
+			//tint
+			if (mShip.damageCooldown <= 0)
+			{
+				Tint(mShip.tex, mShip.col);
+			}
+			mShip.knockbackCooldown = 60.0f;
+			mShip.damageCooldown = 60.0f;
+		}
 	}
+	for (Asteroid& asteroid : mAsteroidsSmall)
+	{
+		Rect asteroidRect = asteroid.Collider();
+		Rect shipRect = mShip.Collider();
+		if (SDL_HasIntersectionF(&shipRect, &asteroidRect))
+		{
+			if (mShip.damageCooldown <= 0)
+			{
+				//damage
+				mShip.damageCooldown = 5.0f;
+				mShip.health = mShip.health - asteroid.damage;
+				//sound
+				PlaySound(sfxShipHit, 0);
+			}
+
+			//knockback
+			if (mShip.knockbackCooldown <= 0)
+			{
+				float r = 180.0f * DEG2RAD;
+				float v = Random(100.0f, 200.0f);
+				Point direction = Normalize(asteroid.velocity);
+				Point direction1 = Rotate(direction, r);
+				asteroid.velocity = direction1 * v;
+			}
+			//tint
+			if (mShip.damageCooldown <= 0)
+			{
+				Tint(mShip.tex, mShip.col);
+			}
+			mShip.knockbackCooldown = 60.0f;
+			mShip.damageCooldown = 60.0f;
+		}
+	}
+	//Temp Death
+	//if (mShip.health <= 0)
+	//{
+	//	mShip.tex = LoadTexture("../Assets/img/explosion.png");
+	//}
 
 	for (Bullet& bullet : mBullets)
 	{
