@@ -184,6 +184,7 @@ private:
 	Sound* sfxPlayerShoot = nullptr;
 	Sound* sfxShipHit = nullptr;
 	Music* bgmDefault = nullptr;
+
 	struct Timer
 	{
 		float duration = 0.0f;	// max time
@@ -261,13 +262,24 @@ private:
 		{
 			//DrawRect(Collider(), col);
 			DrawTexture(tex, Collider(), Angle(direction) * RAD2DEG);
-			DrawLine(position, position + direction * 100.0f, col);
+			DrawLine(position, position + direction * 100.0f, col3);
 		}
 		Texture* tex = nullptr;
 		Timer bulletCooldown;
-		Color col{ 255, 0, 0, 0 };
+		Color col3{ 255, 179, 179, 255 };
+		Color col2{ 255, 102, 102, 255 };
+		Color col1{ 153, 0, 0, 255 };
 	} mShip;
 
+	struct Background : public Entity
+	{
+		void Draw() const
+		{
+			DrawTexture(texBackground, Collider(),0);
+
+		}
+		Texture* texBackground = nullptr;
+	} mBackground;
 	Color mTestColor{ 255, 255, 255, 255 };
 
 	// TODO:

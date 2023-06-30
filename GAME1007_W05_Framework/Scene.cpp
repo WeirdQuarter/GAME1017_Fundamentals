@@ -459,6 +459,7 @@ void Lab2Scene::OnRender()
 
 AsteroidsScene::AsteroidsScene()
 {
+	
 	mShip.tex = LoadTexture("../Assets/img/enterprise.png");
 	sfxPlayerShoot = LoadSound("../Assets/aud/Fire.wav");
 	bgmDefault = LoadMusic("../Assets/aud/bgm.mp3");
@@ -468,10 +469,12 @@ AsteroidsScene::AsteroidsScene()
 		std::cout << "Mix_LoadMUS failed to load file: " << SDL_GetError() << std::endl;
 	}
 	PlayMusic(bgmDefault, 1);
+	mBackground.texBackground = LoadTexture("../Assets/img/background.png");
 }
 
 AsteroidsScene::~AsteroidsScene()
 {
+	UnloadTexture(mBackground.texBackground);
 	UnloadTexture(mShip.tex);
 	UnloadMusic(bgmDefault);
 	UnloadSound(sfxPlayerShoot);
@@ -480,6 +483,10 @@ AsteroidsScene::~AsteroidsScene()
 
 void AsteroidsScene::OnEnter()
 {
+	mBackground.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mBackground.width = 1024.0f;
+	mBackground.height = 768.0f;
+
 	mShip.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
 	mShip.width = mShip.height = 50.0f;
 	mShip.angularSpeed = 200.0f * DEG2RAD;
@@ -488,6 +495,7 @@ void AsteroidsScene::OnEnter()
 
 	mAsteroidTimer.elapsed = 0.0f;
 	mAsteroidTimer.duration = 2.5f;
+
 
 	//SetGuiCallback(OnAsteroidsGui, this);
 }
@@ -501,6 +509,7 @@ void AsteroidsScene::OnUpdate(float dt)
 {
 	mShip.velocity.x = mShip.direction.x * mShip.speed;
 	mShip.velocity.y = mShip.direction.y * mShip.speed;
+	//Cooldowns
 	if (mShip.damageCooldown > 0)
 	{
 		mShip.damageCooldown = mShip.damageCooldown - 1;
@@ -526,11 +535,10 @@ void AsteroidsScene::OnUpdate(float dt)
 
 	if (IsKeyDown(SDL_SCANCODE_W))
 	{	
-		if (mShip.acceleration.x < 1)
+		if (mShip.acceleration.x < 0.5)
 		{
-			mShip.acceleration.x += 0.01f;
+			mShip.acceleration.x += 0.005f;
 		}
-		//mShip.position = mShip.position + mShip.direction * mShip.speed * dt;
 	}
 	else
 	{
@@ -554,7 +562,6 @@ void AsteroidsScene::OnUpdate(float dt)
 		{
 			mShip.acceleration.x = 0;
 		}
-		//mShip.position = mShip.position - mShip.direction * mShip.speed * dt;
 	}
 
 	if (IsKeyDown(SDL_SCANCODE_SPACE))
@@ -573,14 +580,7 @@ void AsteroidsScene::OnUpdate(float dt)
 			PlaySound(sfxPlayerShoot, 0);
 		}
 	}
-	if(IsKeyDown(SDL_SCANCODE_EQUALS))
-	{
-		//increase volume
-	}
-	if(IsKeyDown(SDL_SCANCODE_MINUS))
-	{
-		//decrease volume
-	}
+
 	mShip.bulletCooldown.Tick(dt);
 
 	if (mShip.collsionDelay <= 0)
@@ -607,12 +607,11 @@ void AsteroidsScene::OnUpdate(float dt)
 			if (mShip.damageCooldown <= 0)
 			{
 				//damage
-				mShip.damageCooldown = 5.0f;
+				mShip.damageCooldown = 60.0f;
 				mShip.health = mShip.health - asteroid.damage;
 				//sound
 				PlaySound(sfxShipHit, 0);
 			}
-
 			//knockback
 			if (mShip.knockbackCooldown <= 0)
 			{
@@ -621,14 +620,8 @@ void AsteroidsScene::OnUpdate(float dt)
 				Point direction = Normalize(asteroid.velocity);
 				Point direction1 = Rotate(direction, r);
 				asteroid.velocity = direction1 * v;
+				mShip.knockbackCooldown = 60.0f;
 			}
-			//tint
-			if (mShip.damageCooldown <= 0)
-			{
-				Tint(mShip.tex, mShip.col);
-			}
-			mShip.knockbackCooldown = 60.0f;
-			mShip.damageCooldown = 60.0f;
 		}
 	}
 	for (Asteroid& asteroid : mAsteroidsMedium)
@@ -648,7 +641,7 @@ void AsteroidsScene::OnUpdate(float dt)
 			if (mShip.damageCooldown <= 0)
 			{
 				//damage
-				mShip.damageCooldown = 5.0f;
+				mShip.damageCooldown = 60.0f;
 				mShip.health = mShip.health - asteroid.damage;
 				//sound
 				PlaySound(sfxShipHit, 0);
@@ -661,15 +654,9 @@ void AsteroidsScene::OnUpdate(float dt)
 				float v = Random(100.0f, 200.0f);
 				Point direction = Normalize(asteroid.velocity);
 				Point direction1 = Rotate(direction, r);
-				asteroid.velocity = direction1 * v;
+				asteroid.velocity = direction1 * v; 
+				mShip.knockbackCooldown = 60.0f;
 			}
-			//tint
-			if (mShip.damageCooldown <= 0)
-			{
-				Tint(mShip.tex, mShip.col);
-			}
-			mShip.knockbackCooldown = 60.0f;
-			mShip.damageCooldown = 60.0f;
 		}
 	}
 	for (Asteroid& asteroid : mAsteroidsSmall)
@@ -689,7 +676,7 @@ void AsteroidsScene::OnUpdate(float dt)
 			if (mShip.damageCooldown <= 0)
 			{
 				//damage
-				mShip.damageCooldown = 5.0f;
+				mShip.damageCooldown = 60.0f;
 				mShip.health = mShip.health - asteroid.damage;
 				//sound
 				PlaySound(sfxShipHit, 0);
@@ -703,21 +690,30 @@ void AsteroidsScene::OnUpdate(float dt)
 				Point direction = Normalize(asteroid.velocity);
 				Point direction1 = Rotate(direction, r);
 				asteroid.velocity = direction1 * v;
+				mShip.knockbackCooldown = 60.0f;
 			}
-			//tint
-			if (mShip.damageCooldown <= 0)
-			{
-				Tint(mShip.tex, mShip.col);
-			}
-			mShip.knockbackCooldown = 60.0f;
-			mShip.damageCooldown = 60.0f;
 		}
 	}
-	//Temp Death
-	//if (mShip.health <= 0)
-	//{
-	//	mShip.tex = LoadTexture("../Assets/img/explosion.png");
-	//}
+	//Tint
+	if (mShip.health < 75.0f && mShip.health > 50.0f)
+	{
+		Tint(mShip.tex, mShip.col3);
+	}
+	if (mShip.health < 50.0f && mShip.health > 25.0f)
+	{
+		Tint(mShip.tex, mShip.col2);
+	}
+	if (mShip.health < 25.0f && mShip.health > 0.0f)
+	{
+		Tint(mShip.tex, mShip.col1);
+	}
+	//Death
+	if (mShip.health <= 0)
+	{
+		mShip.tex = LoadTexture("../Assets/img/explosion.png");
+		// Temp Reset
+		mShip.health = 100.0f;
+	}
 
 	for (Bullet& bullet : mBullets)
 	{
@@ -805,6 +801,8 @@ void AsteroidsScene::OnUpdate(float dt)
 		Wrap(asteroid);
 	}
 
+	Wrap(mShip);
+
 	//static float tt = 0.0f;
 	//float r = cosf(tt + PI * 0.00f) * 0.5f + 0.5f;
 	//float g = cosf(tt + PI * 0.33f) * 0.5f + 0.5f;
@@ -882,22 +880,30 @@ void AsteroidsScene::OnUpdate(float dt)
 
 void AsteroidsScene::OnRender()
 {
+	mBackground.Draw();
 	for (const Asteroid& asteroid : mAsteroidsLarge)
 	{
 		asteroid.Draw(); 
 	}
 
 	for (const Asteroid& asteroid : mAsteroidsMedium)
+	{
 		asteroid.Draw();
+	}
 
 	for (const Asteroid& asteroid : mAsteroidsSmall)
+	{
 		asteroid.Draw();
-
+	}
+		
 	for (const Bullet& bullet : mBullets)
+	{
 		bullet.Draw();
+	}
 
 	//DrawRect({ 0, 0, 200, 200 }, mTestColor);
 	mShip.Draw();
+	
 }
 
 void AsteroidsScene::Wrap(Entity& entity)
@@ -949,7 +955,7 @@ void OnAsteroidsGui(void* data)
 		color.g = colors[1] * 255.0f;
 		color.b = colors[2] * 255.0f;
 		color.a = colors[3] * 255.0f;
-		scene.mShip.col = color;
+		scene.mShip.col3 = color;
 
 		// Blending must be applied separately to textures in SDL
 		// See SDL_SetTextureBlendMode
