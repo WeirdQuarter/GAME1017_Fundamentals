@@ -460,6 +460,7 @@ void Lab2Scene::OnRender()
 AsteroidsScene::AsteroidsScene()
 {
 	mShip.tex = LoadTexture("../Assets/img/enterprise.png");
+	
 }
 
 AsteroidsScene::~AsteroidsScene()
@@ -490,6 +491,10 @@ void AsteroidsScene::OnUpdate(float dt)
 {
 	mShip.velocity.x = mShip.direction.x * mShip.speed;
 	mShip.velocity.y = mShip.direction.y * mShip.speed;
+	if (mShip.damageCooldown > 0)
+	{
+		mShip.damageCooldown = mShip.damageCooldown - 1;
+	}
 
 	if (IsKeyDown(SDL_SCANCODE_A))
 	{
@@ -541,9 +546,9 @@ void AsteroidsScene::OnUpdate(float dt)
 			mShip.bulletCooldown.Reset();
 
 			Bullet bullet;
-			bullet.width = bullet.height = 10.0f;
+			bullet.width = bullet.height = 50.0f;
 			bullet.position = mShip.position + mShip.direction * sqrtf(powf(mShip.width * 0.5f + bullet.width * 0.5f, 2.0f));
-			bullet.velocity = mShip.direction * 100.0f;
+			bullet.velocity = mShip.direction * 500.0f;
 			bullet.direction = mShip.direction;
 			mBullets.push_back(bullet);
 		}
@@ -551,6 +556,27 @@ void AsteroidsScene::OnUpdate(float dt)
 	mShip.bulletCooldown.Tick(dt);
 	mShip.position.x += (mShip.velocity.x * mShip.acceleration.x);
 	mShip.position.y += (mShip.velocity.y * mShip.acceleration.x);
+	for (Asteroid& asteroid : mAsteroidsLarge)
+	{
+		Rect asteroidRect = asteroid.Collider();
+		Rect shipRect = mShip.Collider();
+		if (SDL_HasIntersectionF(&shipRect, &asteroidRect) && mShip.damageCooldown <= 0)
+		{
+			//damage
+			mShip.damageCooldown = 5.0f;
+			mShip.health = mShip.health - asteroid.damage;
+			//knockback
+			float r = Random(30.0f, 45.0f) * DEG2RAD;
+			float v = Random(20.0f, 200.0f);
+			Point direction = Normalize(mShip.velocity);
+			Point direction1 = Rotate(direction, r);
+			asteroid.velocity = direction1 * v;
+		}
+	}
+	if (mShip.health <= 0)
+	{
+		mShip.tex = LoadTexture("../Assets/img/explosion.png");
+	}
 
 	for (Bullet& bullet : mBullets)
 	{
@@ -560,7 +586,31 @@ void AsteroidsScene::OnUpdate(float dt)
 		// TODO -- spawn 2 medium asteroids if a bullet hits a large asteroid
 		for (Asteroid& asteroid : mAsteroidsLarge)
 		{
+			Rect asteroidRect = asteroid.Collider();
+			if (SDL_HasIntersectionF(&bulletRect, &asteroidRect))
+			{
+				asteroid.health -= bullet.damage;
 
+				Asteroid asteroid1, asteroid2;
+				asteroid1.position = asteroid2.position = asteroid.position;
+				asteroid1.width = asteroid2.width = mSizeMedium;
+				asteroid1.height = asteroid2.height = mSizeMedium;
+
+				float r = Random(30.0f, 45.0f) * DEG2RAD;
+				float v = Random(20.0f, 200.0f);
+				Point direction = Normalize(bullet.velocity);
+				Point direction1 = Rotate(direction, r);
+				Point direction2 = Rotate(direction, -r);
+				asteroid1.velocity = direction1 * v;
+				asteroid2.velocity = direction2 * v;
+
+				// TODO -- take bullet collider and velocity into account when spawning asteroids
+				asteroid1.position = asteroid1.position + direction1 * mSizeLarge;
+				asteroid2.position = asteroid2.position + direction2 * mSizeLarge;
+
+				mAsteroidsMedium.push_back(asteroid1);
+				mAsteroidsMedium.push_back(asteroid2);
+			}
 		}
 
 		// Spawn 2 small asteroids if a bullet hits a medium asteroid
@@ -625,7 +675,7 @@ void AsteroidsScene::OnUpdate(float dt)
 	if (mAsteroidTimer.Expired())
 	{
 		mAsteroidTimer.Reset();
-		mAsteroidsMedium.push_back(SpawnAsteroid(mSizeMedium));
+		mAsteroidsLarge.push_back(SpawnAsteroid(mSizeLarge));
 	}
 	mAsteroidTimer.Tick(dt);
 
@@ -692,7 +742,9 @@ void AsteroidsScene::OnUpdate(float dt)
 void AsteroidsScene::OnRender()
 {
 	for (const Asteroid& asteroid : mAsteroidsLarge)
-		asteroid.Draw();
+	{
+		asteroid.Draw(); 
+	}
 
 	for (const Asteroid& asteroid : mAsteroidsMedium)
 		asteroid.Draw();
