@@ -17,8 +17,10 @@ void Scene::Init()
 	sScenes[LAB_1A] = new Lab1AScene;
 	sScenes[LAB_1B] = new Lab1BScene;
 	sScenes[LAB_2] = new Lab2Scene;
+	sScenes[LOSE] = new LoseScene;
+	sScenes[PAUSE] = new PauseScene;
 	sScenes[ASTEROIDS] = new AsteroidsScene;
-	sCurrent = ASTEROIDS;
+	sCurrent = TITLE;
 	sScenes[sCurrent]->OnEnter();
 }
 
@@ -47,9 +49,27 @@ void Scene::Change(Type type)
 	sScenes[sCurrent]->OnEnter();
 }
 
+TitleScene::TitleScene()
+{
+	mTitlebackground.tex = LoadTexture("../Assets/img/TitleBack.jpg");
+	mTitleText.tex = LoadTexture("../Assets/img/TitleScreen.png");
+}
+
+TitleScene::~TitleScene()
+{
+	UnloadTexture(mTitlebackground.tex);
+	UnloadTexture(mTitleText.tex);
+}
+
 void TitleScene::OnEnter()
 {
-	SetGuiCallback(OnTitleGui, this);
+	mTitlebackground.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mTitlebackground.width = 1024.0f;
+	mTitlebackground.height = 768.0f;
+
+	mTitleText.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mTitleText.width = 1024.0f;
+	mTitleText.height = 768.0f;
 }
 
 void TitleScene::OnExit()
@@ -59,12 +79,21 @@ void TitleScene::OnExit()
 
 void TitleScene::OnUpdate(float dt)
 {
+	if (IsKeyDown(SDL_SCANCODE_E))
+	{
+		//Not Functional
+		AppExit();
+	}
+	if (IsKeyDown(SDL_SCANCODE_SPACE))
+	{
+		Change(ASTEROIDS);
+	}
 }
 
 void TitleScene::OnRender()
 {
-	DrawRect(mBackRec, { 0, 0, 0, 255 });
-	DrawRect(mFrontRec, { 255, 255, 255, 255 });
+	mTitlebackground.Draw();
+	mTitleText.Draw();
 }
 
 void OnTitleGui(void* data)
@@ -76,6 +105,106 @@ void OnTitleGui(void* data)
 	}
 }
 
+LoseScene::LoseScene()
+{
+	mLosebackground.tex = LoadTexture("../Assets/img/TitleBack.jpg");
+	mLoseText.tex = LoadTexture("../Assets/img/LoseScreen.png");
+}
+
+LoseScene::~LoseScene()
+{
+	UnloadTexture(mLosebackground.tex);
+	UnloadTexture(mLoseText.tex);
+}
+
+void LoseScene::OnEnter()
+{
+	mLosebackground.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mLosebackground.width = 1024.0f;
+	mLosebackground.height = 768.0f;
+
+	mLoseText.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mLoseText.width = 1024.0f;
+	mLoseText.height = 768.0f;
+}
+
+void LoseScene::OnExit()
+{
+	SetGuiCallback(nullptr, nullptr);
+}
+
+void LoseScene::OnUpdate(float dt)
+{
+	if (IsKeyDown(SDL_SCANCODE_M))
+	{
+		Change(TITLE);
+	}
+	if (IsKeyDown(SDL_SCANCODE_R))
+	{
+		Change(ASTEROIDS);
+	}
+}
+
+void LoseScene::OnRender()
+{
+	mLosebackground.Draw();
+	mLoseText.Draw();
+}
+
+PauseScene::PauseScene()
+{
+	mPausebackground.tex = LoadTexture("../Assets/img/TitleBack.jpg");
+	mPauseText.tex = LoadTexture("../Assets/img/PauseScreen.png");
+}
+
+PauseScene::~PauseScene()
+{
+	UnloadTexture(mPausebackground.tex);
+	UnloadTexture(mPauseText.tex);
+}
+
+void PauseScene::OnEnter()
+{
+	mPausebackground.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mPausebackground.width = 1024.0f;
+	mPausebackground.height = 768.0f;
+
+	mPauseText.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+	mPauseText.width = 1024.0f;
+	mPauseText.height = 768.0f;
+
+	pauseTimer = 120.0f;
+}
+
+void PauseScene::OnExit()
+{
+	SetGuiCallback(nullptr, nullptr);
+}
+
+void PauseScene::OnUpdate(float dt)
+{
+	if (pauseTimer > 0)
+	{
+		pauseTimer = pauseTimer - 1.0f;
+	}
+	if (pauseTimer <= 0)
+	{
+		if (IsKeyDown(SDL_SCANCODE_P))
+		{
+			Change(ASTEROIDS);
+		}
+		if (IsKeyDown(SDL_SCANCODE_M))
+		{
+			Change(TITLE);
+		}
+	}
+}
+
+void PauseScene::OnRender()
+{
+	mPausebackground.Draw();
+	mPauseText.Draw();
+}
 GameScene::GameScene()
 {
 	mShipTex = LoadTexture("../Assets/img/enterprise.png");
@@ -487,26 +616,63 @@ void AsteroidsScene::OnEnter()
 	mBackground.width = 1024.0f;
 	mBackground.height = 768.0f;
 
-	mShip.position = Point{ SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
-	mShip.width = mShip.height = 50.0f;
-	mShip.angularSpeed = 200.0f * DEG2RAD;
-	mShip.bulletCooldown.duration = 0.5f;
+
+    XMLDocument doc;
+    doc.LoadFile("AstGame.xml");
+    
+    XMLElement* gameData = doc.FirstChildElement();
+    XMLElement* shipData = gameData->FirstChildElement();
+    shipData->QueryAttribute("x", &mShip.mShipRec.x);
+    shipData->QueryAttribute("y", &mShip.mShipRec.y);
+	shipData->QueryAttribute("w", &mShip.width);
+	shipData->QueryAttribute("w", &mShip.height);
+	shipData->QueryAttribute("h", &mShip.mShipRec.w);
+	shipData->QueryAttribute("h", &mShip.mShipRec.h);
+    shipData->QueryAttribute("speed", &mShip.speed);
+	shipData->QueryAttribute("angspeed", &mShip.angularSpeed);
+	shipData->QueryAttribute("bulletcooldownduration", &mShip.bulletCooldown.duration);
+	shipData->QueryAttribute("xPosition", &mShip.position.x);
+	shipData->QueryAttribute("yPosition", &mShip.position.y);
+
+	XMLElement* astData = gameData->FirstChildElement("Ast");
+	astData->QueryAttribute("timerElasped", &mAsteroidTimer.elapsed);
+	astData->QueryAttribute("timerDuration", &mAsteroidTimer.duration);
+
 	mShip.velocity = { 0,0 };
 
-	mAsteroidTimer.elapsed = 0.0f;
-	mAsteroidTimer.duration = 2.5f;
-
-
-	//SetGuiCallback(OnAsteroidsGui, this);
+	pauseTimer = 120.0f;
 }
 
 void AsteroidsScene::OnExit()
 {
+	XMLDocument doc;
+	XMLNode* root = doc.NewElement("AstGame");
+	doc.InsertEndChild(root);
+
+	XMLElement* ship = doc.NewElement("Ship");
+	ship->SetAttribute("x", mShip.mShipRec.x);
+	ship->SetAttribute("y", mShip.mShipRec.y);
+	ship->SetAttribute("w", mShip.mShipRec.w);
+	ship->SetAttribute("h", mShip.mShipRec.h);
+	ship->SetAttribute("speed", mShip.speed);
+	ship->SetAttribute("angspeed", mShip.angularSpeed);
+	ship->SetAttribute("bulletcooldownduration", mShip.bulletCooldown.duration);
+	ship->SetAttribute("xPosition", mShip.position.x);
+	ship->SetAttribute("yPosition", mShip.position.y);
+	root->InsertEndChild(ship);
+
+	XMLElement* ast = doc.NewElement("Ast");
+	ast->SetAttribute("timerElasped", mAsteroidTimer.elapsed);
+	ast->SetAttribute("timerDuration", mAsteroidTimer.duration);
+	root->InsertEndChild(ast);
+
+	doc.SaveFile("AstGame.xml");
 	SetGuiCallback(nullptr, nullptr);
 }
 
 void AsteroidsScene::OnUpdate(float dt)
 {
+	mShip.mShipRec = mShip.Collider();
 	mShip.velocity.x = mShip.direction.x * mShip.speed;
 	mShip.velocity.y = mShip.direction.y * mShip.speed;
 	//Cooldowns
@@ -522,7 +688,12 @@ void AsteroidsScene::OnUpdate(float dt)
 	{
 		mShip.collsionDelay = mShip.collsionDelay - 1;
 	}
-	
+	if (pauseTimer > 0)
+	{
+		pauseTimer = pauseTimer - 1.0f;
+	} 
+
+
 	if (IsKeyDown(SDL_SCANCODE_A))
 	{
 		mShip.direction = Rotate(mShip.direction, -mShip.angularSpeed * dt);
@@ -544,7 +715,7 @@ void AsteroidsScene::OnUpdate(float dt)
 	{
 		if (mShip.acceleration.x > 0)
 		{
-			mShip.acceleration.x -= 0.005f;
+			mShip.acceleration.x -= 0.009f;
 		}
 		else if (mShip.acceleration.x < 0)
 		{
@@ -564,6 +735,13 @@ void AsteroidsScene::OnUpdate(float dt)
 		}
 	}
 
+	if (pauseTimer <= 0)
+	{
+		if (IsKeyDown(SDL_SCANCODE_P))
+		{
+			Change(PAUSE);
+		}
+	}
 	if (IsKeyDown(SDL_SCANCODE_SPACE))
 	{
 		if (mShip.bulletCooldown.Expired())
@@ -588,8 +766,6 @@ void AsteroidsScene::OnUpdate(float dt)
 		mShip.position.x += (mShip.velocity.x * mShip.acceleration.x);
 		mShip.position.y += (mShip.velocity.y * mShip.acceleration.x);
 	}
-	
-	
 	//Asteriod Collision
 	for (Asteroid& asteroid : mAsteroidsLarge)
 	{
@@ -620,7 +796,7 @@ void AsteroidsScene::OnUpdate(float dt)
 				Point direction = Normalize(asteroid.velocity);
 				Point direction1 = Rotate(direction, r);
 				asteroid.velocity = direction1 * v;
-				mShip.knockbackCooldown = 60.0f;
+				mShip.knockbackCooldown = 20.0f;
 			}
 		}
 	}
@@ -710,11 +886,31 @@ void AsteroidsScene::OnUpdate(float dt)
 	//Death
 	if (mShip.health <= 0)
 	{
+		UnloadTexture(mShip.tex);
 		mShip.tex = LoadTexture("../Assets/img/explosion.png");
-		// Temp Reset
-		mShip.health = 100.0f;
+		mShip.deathDelay++;
+		if (mShip.deathDelay >= 40.0f)
+		{
+			while (!mAsteroidsLarge.empty()) 
+			{
+				mAsteroidsLarge.pop_back();
+			}
+			while (!mAsteroidsMedium.empty()) 
+			{
+				mAsteroidsMedium.pop_back();
+			}
+			while (!mAsteroidsSmall.empty()) 
+			{
+				mAsteroidsSmall.pop_back();
+			}
+			mShip.health = 100.0f;
+			mShip.position = { SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f };
+			mShip.direction = { 1.0f, 0.0f };
+			mShip.tex = LoadTexture("../Assets/img/enterprise.png");
+			Change(LOSE);
+		}
+		
 	}
-
 	for (Bullet& bullet : mBullets)
 	{
 		bullet.position = bullet.position + bullet.velocity * dt;
@@ -864,16 +1060,19 @@ void AsteroidsScene::OnUpdate(float dt)
 
 	mAsteroidsLarge.erase(remove_if(mAsteroidsLarge.begin(), mAsteroidsLarge.end(), [this](const Asteroid& asteroid)
 	{
+		mShip.score = mShip.score + 1;
 		return asteroid.health <= 0.0f;
 	}), mAsteroidsLarge.end());
 
 	mAsteroidsMedium.erase(remove_if(mAsteroidsMedium.begin(), mAsteroidsMedium.end(), [this](const Asteroid& asteroid)
 	{
+		mShip.score = mShip.score + 1;
 		return asteroid.health <= 0.0f;
 	}), mAsteroidsMedium.end());
 
 	mAsteroidsSmall.erase(remove_if(mAsteroidsSmall.begin(), mAsteroidsSmall.end(), [this](const Asteroid& asteroid)
 	{
+		mShip.score = mShip.score + 1;
 		return asteroid.health <= 0.0f;
 	}), mAsteroidsSmall.end());
 }

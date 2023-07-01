@@ -30,6 +30,8 @@ public:
 		LAB_1A,
 		LAB_1B,
 		LAB_2,
+		LOSE,
+		PAUSE,
 		ASTEROIDS,
 		COUNT
 	};
@@ -47,9 +49,12 @@ private:
 	static std::array<Scene*, COUNT> sScenes;
 };
 
-class TitleScene : public Scene
+class LoseScene : public Scene
 {
 public:
+	LoseScene();
+	~LoseScene() final;
+
 	void OnEnter() final;
 	void OnExit() final;
 
@@ -59,6 +64,163 @@ public:
 private:
 	Rect mBackRec = { 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT };
 	Rect mFrontRec = { 0.0f, 0.0f, 60.0f, 40.0f };
+
+	struct Rigidbody
+	{
+		Point position{};
+		Point velocity{};
+		Point acceleration{};
+
+		Point baseVelocity{ 1.0f, 1.0f };
+		Point direction{ 1.0f, 0.0f };
+		float angularSpeed = 0.0f;
+	};
+
+	struct Entity : public Rigidbody
+	{
+		float width = 0.0f;
+		float height = 0.0f;
+
+		Rect Collider() const
+		{
+			return { position.x - width * 0.5f, position.y - height * 0.5f, width, height };
+		}
+	};
+
+	struct Losebackground : public Entity
+	{
+		void Draw() const
+		{
+			DrawTexture(tex, Collider(), 0);
+		}
+		Texture* tex = LoadTexture("../Assets/img/TitleBack.jpg");
+	}mLosebackground;
+
+	struct LoseText : public Entity
+	{
+		void Draw() const
+		{
+			DrawTexture(tex, Collider(), 0);
+		}
+		Texture* tex = nullptr;
+	}mLoseText;
+};
+
+class PauseScene : public Scene
+{
+public:
+	PauseScene();
+	~PauseScene() final;
+
+	void OnEnter() final;
+	void OnExit() final;
+
+	void OnUpdate(float dt) final;
+	void OnRender() final;
+
+
+private:
+	Rect mBackRec = { 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT };
+	Rect mFrontRec = { 0.0f, 0.0f, 60.0f, 40.0f };
+
+	float pauseTimer = 120.0f;
+
+
+	struct Rigidbody
+	{
+		Point position{};
+		Point velocity{};
+		Point acceleration{};
+
+		Point baseVelocity{ 1.0f, 1.0f };
+		Point direction{ 1.0f, 0.0f };
+		float angularSpeed = 0.0f;
+	};
+
+	struct Entity : public Rigidbody
+	{
+		float width = 0.0f;
+		float height = 0.0f;
+
+		Rect Collider() const
+		{
+			return { position.x - width * 0.5f, position.y - height * 0.5f, width, height };
+		}
+	};
+
+	struct PauseBackground : public Entity
+	{
+		void Draw() const
+		{
+			DrawTexture(tex, Collider(), 0);
+		}
+		Texture* tex = LoadTexture("../Assets/img/TitleBack.jpg");
+	}mPausebackground;
+
+	struct PauseText : public Entity
+	{
+		void Draw() const
+		{
+			DrawTexture(tex, Collider(), 0);
+		}
+		Texture* tex = nullptr;
+	}mPauseText;
+};
+
+class TitleScene : public Scene
+{
+public:
+	void OnEnter() final;
+	void OnExit() final;
+
+	void OnUpdate(float dt) final;
+	void OnRender() final;
+
+	TitleScene();
+	~TitleScene() final;
+
+private:
+	Rect mBackRec = { 0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT };
+	Rect mFrontRec = { 0.0f, 0.0f, 60.0f, 40.0f };
+	struct Rigidbody
+	{
+		Point position{};
+		Point velocity{};
+		Point acceleration{};
+
+		Point baseVelocity{ 1.0f, 1.0f };
+		Point direction{ 1.0f, 0.0f };
+		float angularSpeed = 0.0f;
+	};
+
+	struct Entity : public Rigidbody
+	{
+		float width = 0.0f;
+		float height = 0.0f;
+
+		Rect Collider() const
+		{
+			return { position.x - width * 0.5f, position.y - height * 0.5f, width, height };
+		}
+	};
+
+	struct Titlebackground : public Entity
+	{
+		void Draw() const
+		{
+			DrawTexture(tex, Collider(), 0);
+		}
+		Texture* tex = LoadTexture("../Assets/img/TitleBack.jpg");
+	}mTitlebackground;
+
+	struct TileText : public Entity
+	{
+		void Draw() const
+		{
+			DrawTexture(tex, Collider(), 0);
+		}
+		Texture* tex = nullptr;
+	}mTitleText;
 };
 
 class GameScene : public Scene
@@ -184,6 +346,7 @@ private:
 	Sound* sfxPlayerShoot = nullptr;
 	Sound* sfxShipHit = nullptr;
 	Music* bgmDefault = nullptr;
+	float pauseTimer = 120.0f;
 
 	struct Timer
 	{
@@ -252,18 +415,21 @@ private:
 
 	struct Ship : public Entity
 	{
-		float speed = 100.0f;
+		float speed;
 		float health = 100.0f;
-		float damageCooldown = 200.0f;
-		float knockbackCooldown = 200.0f;
+		float damageCooldown = 0.0f;
+		float knockbackCooldown = 0.0f;
 		float collsionDelay = 0.0f;
+		float score = 0.0f;
+		float deathDelay = 0.0f;
 
 		void Draw() const
 		{
 			//DrawRect(Collider(), col);
-			DrawTexture(tex, Collider(), Angle(direction) * RAD2DEG);
+			DrawTexture(tex, mShipRec, Angle(direction) * RAD2DEG);
 			DrawLine(position, position + direction * 100.0f, col3);
 		}
+		Rect mShipRec;
 		Texture* tex = nullptr;
 		Timer bulletCooldown;
 		Color col3{ 255, 179, 179, 255 };
@@ -276,7 +442,6 @@ private:
 		void Draw() const
 		{
 			DrawTexture(texBackground, Collider(),0);
-
 		}
 		Texture* texBackground = nullptr;
 	} mBackground;

@@ -1,0 +1,4 @@
+<AstGame>
+    <Ship x="604.45331" y="360.57404" w="50" h="50" speed="100" angspeed="3.4906585" bulletcooldownduration="0.5" xPosition="512" yPosition="384"/>
+    <Ast timerElasped="1.107" timerDuration="2.5"/>
+</AstGame>
